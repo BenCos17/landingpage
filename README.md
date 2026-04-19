@@ -15,7 +15,6 @@ Personal LAN dashboard. Manage service links and notes from a clean dark UI with
 git clone https://github.com/BenCos17/landingpage
 
 
-```bash
 docker compose up -d
 ```
 
