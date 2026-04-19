@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>jarvis</title>
+<link href="https://fonts.googleapis.com/css2?family=Berkeley+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14; --surface: #13161d; --surface2: #1a1e28;
+    --border: #252a38; --border2: #2e3547;
+    --accent: #4ade80; --accent-dim: #1a3a24;
+    --text: #e8eaf0; --text-muted: #7a8099; --text-dim: #3d4460;
+    --mono: 'Berkeley Mono', monospace; --sans: 'DM Sans', sans-serif; --radius: 8px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-weight: 300; min-height: 100vh; line-height: 1.6; }
+
+  header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); }
+  .logo { font-family: var(--mono); font-size: 1rem; letter-spacing: -0.02em; color: var(--text); }
+  .logo span { color: var(--accent); }
+  .status-bar { display: flex; align-items: center; gap: 1.5rem; font-family: var(--mono); font-size: 0.72rem; color: var(--text-muted); }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: inline-block; animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .admin-btn { font-family: var(--mono); font-size: 0.72rem; padding: 0.4rem 0.85rem; background: transparent; border: 1px solid var(--border2); border-radius: var(--radius); color: var(--text-muted); cursor: pointer; transition: all 0.2s; letter-spacing: 0.03em; }
+  .admin-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  main { max-width: 900px; margin: 0 auto; padding: 3rem 2rem; }
+  .greeting { font-family: var(--mono); font-size: 0.8rem; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.5rem; }
+  h1 { font-size: 2.8rem; font-weight: 300; letter-spacing: -0.04em; color: var(--text); margin-bottom: 0.4rem; line-height: 1.15; }
+  .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 3rem; }
+  section { margin-bottom: 3rem; }
+  .section-label { font-family: var(--mono); font-size: 0.68rem; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.75rem; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .links-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.75rem; }
+  .link-card { display: block; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.1rem; text-decoration: none; transition: all 0.2s; position: relative; overflow: hidden; }
+  .link-card::before { content: ''; position: absolute; top: 0; left: 0; width: 2px; height: 100%; background: var(--accent); opacity: 0; transition: opacity 0.2s; }
+  .link-card:hover { border-color: var(--border2); background: var(--surface2); }
+  .link-card:hover::before { opacity: 1; }
+
+  .link-icon-wrap { width: 32px; height: 32px; margin-bottom: 0.6rem; display: flex; align-items: center; justify-content: center; }
+  .link-favicon { width: 28px; height: 28px; object-fit: contain; border-radius: 4px; }
+  .link-favicon-fallback { font-size: 1.4rem; line-height: 1; }
+  .link-name { display: block; font-weight: 500; font-size: 0.88rem; color: var(--text); margin-bottom: 0.2rem; }
+  .link-desc { display: block; font-size: 0.75rem; color: var(--text-muted); }
+  .link-url { font-family: var(--mono); font-size: 0.65rem; color: var(--text-dim); margin-top: 0.6rem; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .notes-list { display: flex; flex-direction: column; gap: 0.6rem; }
+  .note-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; }
+  .note-meta { font-family: var(--mono); font-size: 0.65rem; color: var(--text-dim); margin-bottom: 0.35rem; }
+  .note-content { font-size: 0.88rem; color: var(--text); }
+
+  .empty { font-family: var(--mono); font-size: 0.78rem; color: var(--text-dim); padding: 1.5rem; border: 1px dashed var(--border); border-radius: var(--radius); text-align: center; }
+  footer { text-align: center; padding: 2rem; font-family: var(--mono); font-size: 0.65rem; color: var(--text-dim); border-top: 1px solid var(--border); }
+
+  /* LOGIN MODAL */
+  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+  .modal-bg.open { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; padding: 2rem; width: 340px; animation: fadeUp 0.2s ease; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+  .modal h2 { font-family: var(--mono); font-size: 0.85rem; font-weight: 400; color: var(--text); margin-bottom: 1.5rem; letter-spacing: 0.03em; }
+  .modal label { display: block; font-family: var(--mono); font-size: 0.7rem; color: var(--text-muted); margin-bottom: 0.4rem; letter-spacing: 0.06em; text-transform: uppercase; }
+  .modal input { width: 100%; background: var(--bg); border: 1px solid var(--border2); border-radius: var(--radius); padding: 0.55rem 0.8rem; color: var(--text); font-family: var(--mono); font-size: 0.8rem; margin-bottom: 1rem; outline: none; transition: border-color 0.2s; }
+  .modal input:focus { border-color: var(--accent); }
+  .modal-actions { display: flex; gap: 0.6rem; margin-top: 0.5rem; }
+  .error-msg { font-family: var(--mono); font-size: 0.72rem; color: #f87171; margin-top: -0.5rem; margin-bottom: 0.75rem; display: none; }
+
+  /* ADMIN PANEL */
+  .admin-panel { display: none; position: fixed; inset: 0; z-index: 200; background: var(--bg); overflow-y: auto; animation: fadeUp 0.2s ease; }
+  .admin-panel.open { display: block; }
+  .admin-header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 10; }
+  .admin-title { font-family: var(--mono); font-size: 0.85rem; color: var(--accent); letter-spacing: 0.05em; }
+  .close-btn { font-family: var(--mono); font-size: 0.72rem; padding: 0.4rem 0.85rem; background: transparent; border: 1px solid var(--border2); border-radius: var(--radius); color: var(--text-muted); cursor: pointer; transition: all 0.2s; }
+  .close-btn:hover { border-color: #f87171; color: #f87171; }
+  .admin-body { max-width: 700px; margin: 0 auto; padding: 2rem; }
+  .admin-section { margin-bottom: 2.5rem; }
+  .admin-section-title { font-family: var(--mono); font-size: 0.72rem; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1rem; }
+  .add-form { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; margin-bottom: 1rem; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem; }
+  .form-col { display: flex; flex-direction: column; }
+  .form-label { font-family: var(--mono); font-size: 0.65rem; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.35rem; }
+  .form-input { background: var(--bg); border: 1px solid var(--border2); border-radius: var(--radius); padding: 0.5rem 0.7rem; color: var(--text); font-family: var(--mono); font-size: 0.78rem; outline: none; transition: border-color 0.2s; width: 100%; }
+  .form-input:focus { border-color: var(--accent); }
+  textarea.form-input { resize: vertical; min-height: 60px; }
+  .form-actions { display: flex; gap: 0.6rem; margin-top: 1rem; align-items: center; }
+
+  .btn-primary { flex: 1; background: var(--accent); border: none; border-radius: var(--radius); padding: 0.6rem; color: #0a1a10; font-family: var(--mono); font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-secondary { background: transparent; border: 1px solid var(--border2); border-radius: var(--radius); padding: 0.6rem 1rem; color: var(--text-muted); font-family: var(--mono); font-size: 0.78rem; cursor: pointer; transition: all 0.2s; }
+  .btn-secondary:hover { border-color: var(--text-muted); color: var(--text); }
+  .btn-add { background: var(--accent-dim); border: 1px solid var(--accent); border-radius: var(--radius); padding: 0.5rem 1rem; color: var(--accent); font-family: var(--mono); font-size: 0.75rem; cursor: pointer; transition: all 0.2s; }
+  .btn-add:hover { background: var(--accent); color: #0a1a10; font-weight: 700; }
+  .btn-add:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .item-row { display: flex; align-items: center; justify-content: space-between; padding: 0.7rem 1rem; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 0.4rem; background: var(--surface); gap: 1rem; }
+  .item-favicon { width: 20px; height: 20px; object-fit: contain; border-radius: 3px; flex-shrink: 0; }
+  .item-favicon-fallback { font-size: 1rem; flex-shrink: 0; }
+  .item-info { flex: 1; min-width: 0; }
+  .item-name { font-size: 0.85rem; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item-detail { font-family: var(--mono); font-size: 0.65rem; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .delete-btn { background: transparent; border: 1px solid var(--border); border-radius: var(--radius); padding: 0.3rem 0.6rem; color: var(--text-dim); font-family: var(--mono); font-size: 0.65rem; cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
+  .delete-btn:hover { border-color: #f87171; color: #f87171; }
+
+  /* META PREVIEW in form */
+  .meta-preview { display: none; align-items: center; gap: 0.6rem; padding: 0.5rem 0.7rem; background: var(--bg); border: 1px solid var(--border2); border-radius: var(--radius); margin-bottom: 0.75rem; }
+  .meta-preview.visible { display: flex; }
+  .meta-preview img { width: 20px; height: 20px; object-fit: contain; border-radius: 3px; }
+  .meta-preview-title { font-family: var(--mono); font-size: 0.72rem; color: var(--text-muted); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .meta-spinner { font-family: var(--mono); font-size: 0.7rem; color: var(--text-dim); display: none; margin-bottom: 0.75rem; }
+  .meta-spinner.visible { display: block; }
+
+  .toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--accent-dim); border: 1px solid var(--accent); border-radius: var(--radius); padding: 0.6rem 1.2rem; font-family: var(--mono); font-size: 0.75rem; color: var(--accent); opacity: 0; transition: all 0.3s; z-index: 999; pointer-events: none; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.error { background: #2a1010; border-color: #f87171; color: #f87171; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><span>//</span> jarvis</div>
+  <div class="status-bar">
+    <span><span class="dot"></span>&nbsp; online</span>
+    <span id="clock"></span>
+  </div>
+  <button class="admin-btn" onclick="openLogin()">admin →</button>
+</header>
+
+<main>
+  <div class="greeting">good <span id="timeOfDay">morning</span></div>
+  <h1>jarvis</h1>
+  <p class="subtitle">your local services, in one place.</p>
+  <section>
+    <div class="section-label">services</div>
+    <div class="links-grid" id="linksGrid"><div class="empty">loading...</div></div>
+  </section>
+  <section>
+    <div class="section-label">notes</div>
+    <div class="notes-list" id="notesList"><div class="empty">loading...</div></div>
+  </section>
+</main>
+
+<footer>jarvis &middot; running on your lan &middot; <span id="footerDate"></span></footer>
+
+<!-- LOGIN MODAL -->
+<div class="modal-bg" id="loginModal">
+  <div class="modal">
+    <h2>// admin access</h2>
+    <label>username</label>
+    <input type="text" id="usernameInput" placeholder="username" autocomplete="username">
+    <label>password</label>
+    <input type="password" id="passwordInput" placeholder="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')tryLogin()">
+    <div class="error-msg" id="loginError">invalid credentials</div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="tryLogin()">unlock</button>
+      <button class="btn-secondary" onclick="closeLogin()">cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div class="admin-panel" id="adminPanel">
+  <div class="admin-header">
+    <div class="admin-title">// admin panel</div>
+    <button class="close-btn" onclick="closeAdmin()">✕ close</button>
+  </div>
+  <div class="admin-body">
+
+    <div class="admin-section">
+      <div class="admin-section-title">credentials</div>
+      <div class="add-form">
+        <div class="form-row">
+          <div class="form-col">
+            <label class="form-label">username</label>
+            <input class="form-input" type="text" id="newUsername" placeholder="new username" autocomplete="off">
+          </div>
+          <div class="form-col">
+            <label class="form-label">&nbsp;</label>
+            <div style="font-family:var(--mono);font-size:0.65rem;color:var(--text-dim);padding-top:0.35rem;">leave password blank to keep current</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-col">
+            <label class="form-label">new password</label>
+            <input class="form-input" type="password" id="newPassword" placeholder="new password" autocomplete="new-password">
+          </div>
+          <div class="form-col">
+            <label class="form-label">confirm password</label>
+            <input class="form-input" type="password" id="confirmPassword" placeholder="confirm" autocomplete="new-password">
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-add" onclick="saveCredentials()">update credentials</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-section">
+      <div class="admin-section-title">services / links</div>
+      <div class="add-form">
+        <div class="form-col" style="margin-bottom:0.75rem">
+          <label class="form-label">url — paste first, we'll fetch the rest</label>
+          <input class="form-input" type="url" id="linkUrl" placeholder="http://192.168.1.x:8096" onblur="autoFetchMeta()">
+        </div>
+        <div class="meta-spinner" id="metaSpinner">// fetching site info...</div>
+        <div class="meta-preview" id="metaPreview">
+          <img id="metaFaviconPreview" src="" alt="">
+          <span class="meta-preview-title" id="metaTitlePreview"></span>
+        </div>
+        <div class="form-row">
+          <div class="form-col">
+            <label class="form-label">name</label>
+            <input class="form-input" type="text" id="linkName" placeholder="Jellyfin">
+          </div>
+          <div class="form-col">
+            <label class="form-label">icon override (emoji)</label>
+            <input class="form-input" type="text" id="linkIcon" placeholder="leave blank to use favicon" maxlength="4">
+          </div>
+        </div>
+        <div class="form-col">
+          <label class="form-label">description</label>
+          <input class="form-input" type="text" id="linkDesc" placeholder="Media server">
+        </div>
+        <div class="form-actions">
+          <button class="btn-add" id="addLinkBtn" onclick="addLink()">+ add service</button>
+        </div>
+      </div>
+      <div id="adminLinks"></div>
+    </div>
+
+    <div class="admin-section">
+      <div class="admin-section-title">notes</div>
+      <div class="add-form">
+        <label class="form-label">note content</label>
+        <textarea class="form-input" id="noteContent" placeholder="Write a note, reminder, or announcement..."></textarea>
+        <div class="form-actions">
+          <button class="btn-add" id="addNoteBtn" onclick="addNote()">+ add note</button>
+        </div>
+      </div>
+      <div id="adminNotes"></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ──
+let pendingFaviconUrl = null;
+
+// ── CLOCK ──
+function updateClock() {
+  const now = new Date(), h = now.getHours();
+  document.getElementById('clock').textContent = now.toLocaleTimeString('en-IE', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+  document.getElementById('timeOfDay').textContent = h < 12 ? 'morning' : h < 18 ? 'afternoon' : 'evening';
+  document.getElementById('footerDate').textContent = now.toLocaleDateString('en-IE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+}
+setInterval(updateClock, 1000); updateClock();
+
+// ── UTILS ──
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function toast(msg, isError=false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'toast show' + (isError ? ' error' : '');
+  setTimeout(() => el.className = 'toast', 2500);
+}
+
+async function api(method, path, body) {
+  const res = await fetch(path, { method, headers: {'Content-Type':'application/json'}, body: body ? JSON.stringify(body) : undefined });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'request failed');
+  return data;
+}
+
+function faviconImg(faviconUrl, fallback, cls, size) {
+  if (faviconUrl) {
+    const proxied = '/api/proxy-favicon?url=' + encodeURIComponent(faviconUrl);
+    return `<img class="${cls}" src="${esc(proxied)}" width="${size}" height="${size}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'">
+            <span class="${cls}-fallback" style="display:none">${esc(fallback||'🔗')}</span>`;
+  }
+  return `<span class="${cls}-fallback">${esc(fallback||'🔗')}</span>`;
+}
+
+// ── PUBLIC RENDER ──
+async function loadPublic() {
+  try {
+    const [links, notes] = await Promise.all([fetch('/api/links').then(r=>r.json()), fetch('/api/notes').then(r=>r.json())]);
+    renderLinks(links); renderNotes(notes);
+  } catch {}
+}
+
+function renderLinks(links) {
+  const grid = document.getElementById('linksGrid');
+  if (!links.length) { grid.innerHTML = '<div class="empty">no services yet — add some in the admin panel</div>'; return; }
+  grid.innerHTML = links.map(l => `
+    <a class="link-card" href="${esc(l.url)}" target="_blank" rel="noopener">
+      <div class="link-icon-wrap">
+        ${faviconImg(l.faviconUrl, l.icon||'🔗', 'link-favicon', 28)}
+      </div>
+      <span class="link-name">${esc(l.name)}</span>
+      <span class="link-desc">${esc(l.desc)}</span>
+      <span class="link-url">${esc(l.url)}</span>
+    </a>`).join('');
+}
+
+function renderNotes(notes) {
+  const list = document.getElementById('notesList');
+  if (!notes.length) { list.innerHTML = '<div class="empty">no notes yet — add some in the admin panel</div>'; return; }
+  list.innerHTML = notes.map(n => `
+    <div class="note-card">
+      <div class="note-meta">${esc(n.date)}</div>
+      <div class="note-content">${esc(n.content)}</div>
+    </div>`).join('');
+}
+
+// ── META AUTO-FETCH ──
+async function autoFetchMeta() {
+  let url = document.getElementById('linkUrl').value.trim();
+  if (!url) return;
+  if (!/^https?:\/\//i.test(url)) url = 'http://' + url;
+
+  pendingFaviconUrl = null;
+  document.getElementById('metaPreview').classList.remove('visible');
+  document.getElementById('metaSpinner').classList.add('visible');
+
+  try {
+    const res = await fetch('/api/fetch-meta?url=' + encodeURIComponent(url));
+    const meta = await res.json();
+    document.getElementById('metaSpinner').classList.remove('visible');
+
+    if (meta.title || meta.faviconUrl) {
+      if (meta.title && !document.getElementById('linkName').value) {
+        document.getElementById('linkName').value = meta.title;
+      }
+      pendingFaviconUrl = meta.faviconUrl;
+      const preview = document.getElementById('metaPreview');
+      const imgEl = document.getElementById('metaFaviconPreview');
+      const titleEl = document.getElementById('metaTitlePreview');
+      if (meta.faviconUrl) {
+        imgEl.src = '/api/proxy-favicon?url=' + encodeURIComponent(meta.faviconUrl);
+        imgEl.style.display = '';
+      } else {
+        imgEl.style.display = 'none';
+      }
+      titleEl.textContent = meta.title || url;
+      preview.classList.add('visible');
+    }
+  } catch {
+    document.getElementById('metaSpinner').classList.remove('visible');
+  }
+}
+
+// ── LOGIN ──
+function openLogin() {
+  document.getElementById('loginModal').classList.add('open');
+  document.getElementById('usernameInput').value = '';
+  document.getElementById('passwordInput').value = '';
+  document.getElementById('loginError').style.display = 'none';
+  setTimeout(() => document.getElementById('usernameInput').focus(), 100);
+}
+function closeLogin() { document.getElementById('loginModal').classList.remove('open'); }
+
+async function tryLogin() {
+  const username = document.getElementById('usernameInput').value;
+  const password = document.getElementById('passwordInput').value;
+  try {
+    await api('POST', '/api/login', { username, password });
+    closeLogin(); openAdmin();
+  } catch {
+    document.getElementById('loginError').style.display = 'block';
+    document.getElementById('passwordInput').value = '';
+    document.getElementById('passwordInput').focus();
+  }
+}
+
+// ── ADMIN ──
+async function openAdmin() {
+  document.getElementById('adminPanel').classList.add('open');
+  await refreshAdminLists();
+}
+function closeAdmin() { document.getElementById('adminPanel').classList.remove('open'); loadPublic(); }
+
+async function refreshAdminLists() {
+  try {
+    const [links, notes] = await Promise.all([fetch('/api/links').then(r=>r.json()), fetch('/api/notes').then(r=>r.json())]);
+    renderAdminLinks(links); renderAdminNotes(notes);
+  } catch {}
+}
+
+function renderAdminLinks(links) {
+  const el = document.getElementById('adminLinks');
+  if (!links.length) { el.innerHTML = '<div class="empty">no services yet</div>'; return; }
+  el.innerHTML = links.map((l,i) => `
+    <div class="item-row">
+      ${faviconImg(l.faviconUrl, l.icon||'🔗', 'item-favicon', 20)}
+      <div class="item-info">
+        <div class="item-name">${esc(l.name)}</div>
+        <div class="item-detail">${esc(l.url)}</div>
+      </div>
+      <button class="delete-btn" onclick="deleteLink(${i})">remove</button>
+    </div>`).join('');
+}
+
+function renderAdminNotes(notes) {
+  const el = document.getElementById('adminNotes');
+  if (!notes.length) { el.innerHTML = '<div class="empty">no notes yet</div>'; return; }
+  el.innerHTML = notes.map((n,i) => `
+    <div class="item-row">
+      <div class="item-info">
+        <div class="item-name">${esc(n.content.slice(0,60))}${n.content.length>60?'…':''}</div>
+        <div class="item-detail">${esc(n.date)}</div>
+      </div>
+      <button class="delete-btn" onclick="deleteNote(${i})">remove</button>
+    </div>`).join('');
+}
+
+async function saveCredentials() {
+  const username = document.getElementById('newUsername').value.trim();
+  const newPassword = document.getElementById('newPassword').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
+  if (!username) { toast('username cannot be empty', true); return; }
+  if (newPassword && newPassword !== confirmPassword) { toast('passwords do not match', true); return; }
+  try {
+    await api('POST', '/api/credentials', { username, newPassword, confirmPassword });
+    ['newUsername','newPassword','confirmPassword'].forEach(id => document.getElementById(id).value = '');
+    toast('credentials updated ✓');
+  } catch(e) { toast(e.message, true); }
+}
+
+async function addLink() {
+  const name = document.getElementById('linkName').value.trim();
+  let url = document.getElementById('linkUrl').value.trim();
+  const icon = document.getElementById('linkIcon').value.trim();
+  const desc = document.getElementById('linkDesc').value.trim();
+  if (!name || !url) { toast('name and url are required', true); return; }
+  if (!/^https?:\/\//i.test(url)) url = 'http://' + url;
+  const btn = document.getElementById('addLinkBtn');
+  btn.disabled = true;
+  try {
+    const data = await api('POST', '/api/links', { name, url, icon, desc, faviconUrl: pendingFaviconUrl });
+    ['linkName','linkUrl','linkIcon','linkDesc'].forEach(id => document.getElementById(id).value = '');
+    pendingFaviconUrl = null;
+    document.getElementById('metaPreview').classList.remove('visible');
+    renderAdminLinks(data.links);
+    toast('service added ✓');
+  } catch(e) { toast(e.message, true); }
+  btn.disabled = false;
+}
+
+async function deleteLink(i) {
+  try { const data = await api('DELETE', `/api/links/${i}`); renderAdminLinks(data.links); toast('service removed'); }
+  catch(e) { toast(e.message, true); }
+}
+
+async function addNote() {
+  const content = document.getElementById('noteContent').value.trim();
+  if (!content) { toast('write something first', true); return; }
+  const btn = document.getElementById('addNoteBtn');
+  btn.disabled = true;
+  try {
+    const data = await api('POST', '/api/notes', { content });
+    document.getElementById('noteContent').value = '';
+    renderAdminNotes(data.notes);
+    toast('note added ✓');
+  } catch(e) { toast(e.message, true); }
+  btn.disabled = false;
+}
+
+async function deleteNote(i) {
+  try { const data = await api('DELETE', `/api/notes/${i}`); renderAdminNotes(data.notes); toast('note removed'); }
+  catch(e) { toast(e.message, true); }
+}
+
+document.getElementById('loginModal').addEventListener('click', function(e) { if (e.target===this) closeLogin(); });
+
+loadPublic();
+</script>
+</body>
+</html>
