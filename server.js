@@ -105,7 +105,13 @@ app.post('/api/login', (req, res) => {
 app.post('/api/logout', (req, res) => { req.session.destroy(); res.json({ ok: true }); });
 app.get('/api/me', (req, res) => res.json({ authenticated: !!req.session?.authenticated }));
 
-app.get('/api/data', (req, res) => { const d = readData(); res.json({ links: d.links, notes: d.notes, settings: d.settings || {} }); });
+app.get('/api/data', (req, res) => { const d = readData(); res.json({ links: d.links, notes: d.notes, settings: d.settings || {}, appearance: d.appearance || {} }); });
+
+app.post('/api/appearance', requireAuth, (req, res) => {
+  const d = readData();
+  d.appearance = { ...d.appearance, ...req.body };
+  writeData(d); res.json({ ok: true, appearance: d.appearance });
+});
 
 app.post('/api/links', requireAuth, (req, res) => {
   const { name, url, icon, desc, faviconUrl, color } = req.body;
@@ -141,6 +147,15 @@ app.post('/api/notes', requireAuth, (req, res) => {
   if (!content) return res.status(400).json({ error: 'content required' });
   const d = readData();
   d.notes.unshift({ content, date: new Date().toLocaleString('en-IE', { dateStyle: 'medium', timeStyle: 'short' }) });
+  writeData(d); res.json({ ok: true, notes: d.notes });
+});
+
+app.put('/api/notes/:index', requireAuth, (req, res) => {
+  const d = readData(); const i = parseInt(req.params.index);
+  if (isNaN(i) || i < 0 || i >= d.notes.length) return res.status(400).json({ error: 'invalid index' });
+  const { content } = req.body;
+  if (!content) return res.status(400).json({ error: 'content required' });
+  d.notes[i] = { ...d.notes[i], content };
   writeData(d); res.json({ ok: true, notes: d.notes });
 });
 

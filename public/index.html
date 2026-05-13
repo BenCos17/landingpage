@@ -18,6 +18,7 @@
   --r: 8px; --r2: 12px;
   --cols: 4;
 }
+#dynamic-appearance { /* injected by JS */ }
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 html { height:100%; }
 body { background:var(--bg); color:var(--text); font-family:var(--sans); font-weight:300; min-height:100vh; }
@@ -224,7 +225,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:14px; h
 
 <!-- ══ HEADER ══ -->
 <header>
-  <div class="logo"><em>//</em> jarvis</div>
+  <div class="logo"><em>//</em> <span class="js-site-name">jarvis</span></div>
   <div class="header-right">
     <span class="hdr-clock"><span class="dot"></span><span id="clock"></span></span>
     <button class="btn-admin" onclick="openLogin()">admin →</button>
@@ -234,9 +235,9 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:14px; h
 <!-- ══ MAIN ══ -->
 <main>
   <div class="hero">
-    <div class="hero-tag">good <span id="timeOfDay">morning</span></div>
-    <h1>jarvis</h1>
-    <p>your local services, in one place.</p>
+    <div class="hero-tag" id="heroTag">good <span id="timeOfDay">morning</span></div>
+    <h1 class="js-site-name">jarvis</h1>
+    <p id="heroSubtitle">your local services, in one place.</p>
   </div>
 
   <div class="search-wrap">
@@ -294,6 +295,9 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:14px; h
       </div>
       <div class="admin-nav-item" onclick="switchTab('layout')" id="nav-layout">
         <span class="admin-nav-icon">⊞</span> layout
+      </div>
+      <div class="admin-nav-item" onclick="switchTab('appearance')" id="nav-appearance">
+        <span class="admin-nav-icon">◑</span> appearance
       </div>
       <div class="admin-nav-item" onclick="switchTab('security')" id="nav-security">
         <span class="admin-nav-icon">◉</span> security
@@ -388,6 +392,111 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:14px; h
         </div>
       </div>
 
+      <!-- ── APPEARANCE TAB ── -->
+      <div class="admin-tab" id="tab-appearance">
+        <div class="admin-tab-title">appearance</div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">branding</div>
+          <div class="card-form">
+            <div class="form-grid-2">
+              <div class="field">
+                <label class="field-label">site name</label>
+                <input class="field-input" id="apName" placeholder="jarvis">
+              </div>
+              <div class="field">
+                <label class="field-label">greeting tag</label>
+                <input class="field-input" id="apTag" placeholder="good morning / afternoon...">
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label">subtitle</label>
+              <input class="field-input" id="apSubtitle" placeholder="your local services, in one place.">
+            </div>
+            <div class="field">
+              <label class="field-label">footer text</label>
+              <input class="field-input" id="apFooter" placeholder="jarvis · running on your lan">
+            </div>
+            <div class="form-footer">
+              <button class="btn btn-green" onclick="saveAppearance()">save branding</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">colours</div>
+          <div class="card-form">
+            <div class="form-grid-2">
+              <div class="field">
+                <label class="field-label">accent colour</label>
+                <div style="display:flex;align-items:center;gap:.6rem;">
+                  <input type="color" id="apAccent" value="#4ade80" style="width:36px;height:36px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);cursor:pointer;padding:2px;">
+                  <span class="field-input" id="apAccentHex" style="flex:1;cursor:pointer" onclick="document.getElementById('apAccent').click()">#4ade80</span>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label">background colour</label>
+                <div style="display:flex;align-items:center;gap:.6rem;">
+                  <input type="color" id="apBg" value="#0c0e13" style="width:36px;height:36px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);cursor:pointer;padding:2px;">
+                  <span class="field-input" id="apBgHex" style="flex:1;cursor:pointer" onclick="document.getElementById('apBg').click()">#0c0e13</span>
+                </div>
+              </div>
+            </div>
+            <div class="form-grid-2">
+              <div class="field">
+                <label class="field-label">surface colour</label>
+                <div style="display:flex;align-items:center;gap:.6rem;">
+                  <input type="color" id="apSurface" value="#12151c" style="width:36px;height:36px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);cursor:pointer;padding:2px;">
+                  <span class="field-input" id="apSurfaceHex" style="flex:1;cursor:pointer" onclick="document.getElementById('apSurface').click()">#12151c</span>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label">text colour</label>
+                <div style="display:flex;align-items:center;gap:.6rem;">
+                  <input type="color" id="apText" value="#e4e8f0" style="width:36px;height:36px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);cursor:pointer;padding:2px;">
+                  <span class="field-input" id="apTextHex" style="flex:1;cursor:pointer" onclick="document.getElementById('apText').click()">#e4e8f0</span>
+                </div>
+              </div>
+            </div>
+            <div class="form-footer">
+              <button class="btn btn-green" onclick="saveAppearance()">save colours</button>
+              <button class="btn btn-ghost" onclick="resetAppearance()">reset to defaults</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">typography</div>
+          <div class="card-form">
+            <div class="form-grid-2">
+              <div class="field">
+                <label class="field-label">body font</label>
+                <select class="field-input" id="apSansFont">
+                  <option value="'DM Sans', system-ui, sans-serif">DM Sans (default)</option>
+                  <option value="system-ui, sans-serif">System UI</option>
+                  <option value="'Inter', system-ui, sans-serif">Inter</option>
+                  <option value="'Roboto', system-ui, sans-serif">Roboto</option>
+                  <option value="Georgia, serif">Georgia (serif)</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="field-label">mono font</label>
+                <select class="field-input" id="apMonoFont">
+                  <option value="'Berkeley Mono', 'Fira Mono', monospace">Berkeley Mono (default)</option>
+                  <option value="'Fira Mono', monospace">Fira Mono</option>
+                  <option value="'JetBrains Mono', monospace">JetBrains Mono</option>
+                  <option value="'Courier New', monospace">Courier New</option>
+                  <option value="monospace">System Mono</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-footer">
+              <button class="btn btn-green" onclick="saveAppearance()">save fonts</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- ── SECURITY TAB ── -->
       <div class="admin-tab" id="tab-security">
         <div class="admin-tab-title">credentials</div>
@@ -433,7 +542,7 @@ const COLORS = [
   { label:'pink', val:'#f472b6' },
 ];
 
-let state = { links:[], notes:[], settings:{ columns:4, compactMode:false } };
+let state = { links:[], notes:[], settings:{ columns:4, compactMode:false }, appearance:{} };
 let pendingFavicon = null;
 let addColor = null;
 let dragSrcIdx = null;
@@ -453,6 +562,7 @@ async function loadData() {
     const d = await apiFetch('GET', '/api/data');
     state = d;
     applySettings(d.settings);
+    applyAppearance(d.appearance || {});
     renderLinks(d.links);
     renderNotes(d.notes);
   } catch {}
@@ -464,8 +574,10 @@ async function loadData() {
 function updateClock() {
   const now = new Date(), h = now.getHours();
   document.getElementById('clock').textContent = now.toLocaleTimeString('en-IE',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
-  document.getElementById('timeOfDay').textContent = h<12?'morning':h<18?'afternoon':'evening';
-  document.getElementById('footerDate').textContent = 'jarvis · ' + now.toLocaleDateString('en-IE',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const todEl = document.getElementById('timeOfDay'); if (todEl) todEl.textContent = h<12?'morning':h<18?'afternoon':'evening';
+  const prefix = window._footerPrefix || 'jarvis · running on your lan';
+  const footerEl = document.getElementById('footerDate');
+  if (footerEl) footerEl.textContent = prefix + ' · ' + now.toLocaleDateString('en-IE',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 }
 
 // ══════════════════════════════════════
@@ -775,9 +887,33 @@ function refreshAdminNotes() {
         <div class="row-url">${esc(n.date)}</div>
       </div>
       <div class="row-actions">
+        <button class="row-btn" onclick="toggleNoteEdit(${i})">edit</button>
         <button class="row-btn del" onclick="deleteNote(${i})">remove</button>
       </div>
+    </div>
+    <div class="inline-edit" id="note-edit-${i}">
+      <div class="field">
+        <label class="field-label">note content</label>
+        <textarea class="field-input" id="note-content-${i}">${esc(n.content)}</textarea>
+      </div>
+      <div class="form-footer">
+        <button class="btn btn-green" onclick="saveNote(${i})">save</button>
+        <button class="btn btn-ghost" onclick="toggleNoteEdit(${i})">cancel</button>
+      </div>
     </div>`).join('');
+}
+
+function toggleNoteEdit(i) {
+  document.getElementById(`note-edit-${i}`).classList.toggle('show');
+}
+
+async function saveNote(i) {
+  const content = document.getElementById(`note-content-${i}`).value.trim();
+  if (!content) { toast('note cannot be empty', 'err'); return; }
+  try {
+    const d = await apiFetch('PUT', `/api/notes/${i}`, { content });
+    state.notes = d.notes; refreshAdminNotes(); toast('note saved ✓');
+  } catch(e) { toast(e.message, 'err'); }
 }
 
 async function addNote() {
@@ -795,6 +931,88 @@ async function addNote() {
 async function deleteNote(i) {
   try { const d=await apiFetch('DELETE',`/api/notes/${i}`); state.notes=d.notes; refreshAdminNotes(); toast('note removed'); }
   catch(e){toast(e.message,'err');}
+}
+
+// ── APPEARANCE ──
+const APPEARANCE_DEFAULTS = {
+  name: 'jarvis', tag: '', subtitle: 'your local services, in one place.',
+  footer: '', accent: '#4ade80', bg: '#0c0e13', surface: '#12151c', text: '#e4e8f0',
+  sansFont: "'DM Sans', system-ui, sans-serif",
+  monoFont: "'Berkeley Mono', 'Fira Mono', monospace"
+};
+
+function applyAppearance(ap) {
+  const a = { ...APPEARANCE_DEFAULTS, ...ap };
+  // text content
+  document.querySelectorAll('.js-site-name').forEach(el => el.textContent = a.name);
+  document.title = a.name;
+  const tagEl = document.getElementById('heroTag');
+  if (tagEl) tagEl.innerHTML = a.tag || 'good <span id="timeOfDay">morning</span>';
+  const subtitleEl = document.getElementById('heroSubtitle');
+  if (subtitleEl) subtitleEl.textContent = a.subtitle;
+  const footerEl = document.getElementById('footerDate');
+  // footer text is updated by clock too, store for clock to use
+  window._footerPrefix = a.footer || a.name + ' · running on your lan';
+  // css vars
+  const style = document.getElementById('dynamic-appearance') || (() => {
+    const s = document.createElement('style'); s.id='dynamic-appearance'; document.head.appendChild(s); return s;
+  })();
+  // derive dim versions
+  style.textContent = `:root {
+    --accent: ${a.accent};
+    --bg: ${a.bg};
+    --surface: ${a.surface};
+    --text: ${a.text};
+    --mono: ${a.monoFont};
+    --sans: ${a.sansFont};
+  }`;
+  // populate appearance form
+  const set = (id, val) => { const el=document.getElementById(id); if(el) el.value=val; };
+  set('apName', a.name); set('apTag', a.tag); set('apSubtitle', a.subtitle); set('apFooter', a.footer||'');
+  set('apAccent', a.accent); set('apAccentHex', a.accent);
+  set('apBg', a.bg); set('apBgHex', a.bg);
+  set('apSurface', a.surface); set('apSurfaceHex', a.surface);
+  set('apText', a.text); set('apTextHex', a.text);
+  set('apSansFont', a.sansFont); set('apMonoFont', a.monoFont);
+}
+
+function wireColorInput(pickerId, hexId) {
+  const picker = document.getElementById(pickerId);
+  const hex = document.getElementById(hexId);
+  if (!picker||!hex) return;
+  picker.addEventListener('input', () => { hex.textContent = picker.value; });
+  hex.addEventListener('blur', () => { if (/^#[0-9a-f]{6}$/i.test(hex.textContent)) picker.value = hex.textContent; });
+}
+
+async function saveAppearance() {
+  const g = id => document.getElementById(id)?.value || '';
+  const ap = {
+    name: g('apName') || 'jarvis',
+    tag: g('apTag'),
+    subtitle: g('apSubtitle'),
+    footer: g('apFooter'),
+    accent: g('apAccent'),
+    bg: g('apBg'),
+    surface: g('apSurface'),
+    text: g('apText'),
+    sansFont: g('apSansFont'),
+    monoFont: g('apMonoFont'),
+  };
+  try {
+    const d = await apiFetch('POST', '/api/appearance', ap);
+    state.appearance = d.appearance;
+    applyAppearance(d.appearance);
+    toast('appearance saved ✓');
+  } catch(e) { toast(e.message, 'err'); }
+}
+
+async function resetAppearance() {
+  try {
+    const d = await apiFetch('POST', '/api/appearance', APPEARANCE_DEFAULTS);
+    state.appearance = d.appearance;
+    applyAppearance(d.appearance);
+    toast('reset to defaults ✓');
+  } catch(e) { toast(e.message, 'err'); }
 }
 
 // ── LAYOUT ──
@@ -825,6 +1043,21 @@ async function saveCredentials() {
     toast('credentials updated ✓');
   } catch(e){toast(e.message,'err');}
 }
+
+// wire colour pickers live preview
+['apAccent','apBg','apSurface','apText'].forEach(id => {
+  const picker = document.getElementById(id);
+  const hexId = id + 'Hex';
+  if (picker) {
+    picker.addEventListener('input', () => {
+      const hex = document.getElementById(hexId);
+      if (hex) hex.textContent = picker.value;
+      // live preview just the changed var
+      const varMap = { apAccent:'--accent', apBg:'--bg', apSurface:'--surface', apText:'--text' };
+      if (varMap[id]) document.documentElement.style.setProperty(varMap[id], picker.value);
+    });
+  }
+});
 
 init();
 </script>
