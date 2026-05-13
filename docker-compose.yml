@@ -16,6 +16,4 @@ services:
       # change the above SESSION_SECRET to a random string 
 
 volumes:
-  jarvis_data:
-    external: true
-    name: landing_page_jarvis_data
+  - /home/docker/landing/jarvis/data:/data
