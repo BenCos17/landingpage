@@ -6,14 +6,10 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - jarvis_data:/data
+      - /home/docker/landing/jarvis/data:/data
     environment:
       - PORT=3000
       - DATA_FILE=/data/jarvis.json
       - DEFAULT_USERNAME=admin
       - DEFAULT_PASSWORD=admin
       - SESSION_SECRET=b4a6fe0ae1c6dc3fdb863865475b321a758d66fa86fac1710cc53869974d45d5
-      # change the above SESSION_SECRET to a random string 
-
-volumes:
-  - /home/docker/landing/jarvis/data:/data
