@@ -2,11 +2,12 @@ name: Build and Publish Jarvis
 
 on:
   push:
-    branches: [ "main" ]  # Triggers when you push to main
+    branches: [ "main" ]
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  # We remove the IMAGE_NAME env here and handle it in the steps
 
 jobs:
   build-and-push:
@@ -31,4 +32,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          # This 'tags' line uses a trick to force lowercase
+          tags: ${{ env.REGISTRY }}/${{ github.repository_owner }}/landingpage:latest
+          # Alternatively, if you want it to be automatic:
+          # tags: ghcr.io/${{ github.repository_owner }}/landingpage:latest
