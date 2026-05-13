@@ -7,7 +7,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  # We remove the IMAGE_NAME env here and handle it in the steps
 
 jobs:
   build-and-push:
@@ -27,12 +26,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Lowercase the repo name
+        run: |
+          echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          # This 'tags' line uses a trick to force lowercase
-          tags: ${{ env.REGISTRY }}/${{ github.repository_owner }}/landingpage:latest
-          # Alternatively, if you want it to be automatic:
-          # tags: ghcr.io/${{ github.repository_owner }}/landingpage:latest
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
