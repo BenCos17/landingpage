@@ -1,20 +1,10 @@
 # jarvis
 
-this is coded using claude so your mileage may vary but it works for me and I'm just documating it here so I don't lose it lol 
-
-
-<img width="2559" height="1031" alt="image" src="https://github.com/user-attachments/assets/99d2fb28-7603-486e-bd20-e503ea8c853c" />
-
-
-
 Personal LAN dashboard. Manage service links and notes from a clean dark UI with a login-protected admin panel.
 
 ## quick start
 
-```
-git clone https://github.com/BenCos17/landingpage
-
-
+```bash
 docker compose up -d
 ```
 

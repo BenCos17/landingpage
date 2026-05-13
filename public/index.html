@@ -4,478 +4,828 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>jarvis</title>
-<link href="https://fonts.googleapis.com/css2?family=Berkeley+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Berkeley+Mono:ital,wght@0,400;0,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0d0f14; --surface: #13161d; --surface2: #1a1e28;
-    --border: #252a38; --border2: #2e3547;
-    --accent: #4ade80; --accent-dim: #1a3a24;
-    --text: #e8eaf0; --text-muted: #7a8099; --text-dim: #3d4460;
-    --mono: 'Berkeley Mono', monospace; --sans: 'DM Sans', sans-serif; --radius: 8px;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-weight: 300; min-height: 100vh; line-height: 1.6; }
+:root {
+  --bg: #0c0e13; --surface: #12151c; --surface2: #181c26; --surface3: #1e2330;
+  --border: #232838; --border2: #2c3347; --border3: #38405a;
+  --accent: #4ade80; --accent-dim: #172d1e; --accent2: #38bdf8; --accent2-dim: #0f2233;
+  --text: #e4e8f0; --text-muted: #6b7594; --text-dim: #353d57;
+  --red: #f87171; --red-dim: #2a1212;
+  --mono: 'Berkeley Mono', 'Fira Mono', monospace;
+  --sans: 'DM Sans', system-ui, sans-serif;
+  --r: 8px; --r2: 12px;
+  --cols: 4;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { height:100%; }
+body { background:var(--bg); color:var(--text); font-family:var(--sans); font-weight:300; min-height:100vh; }
 
-  header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); }
-  .logo { font-family: var(--mono); font-size: 1rem; letter-spacing: -0.02em; color: var(--text); }
-  .logo span { color: var(--accent); }
-  .status-bar { display: flex; align-items: center; gap: 1.5rem; font-family: var(--mono); font-size: 0.72rem; color: var(--text-muted); }
-  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: inline-block; animation: pulse 2s ease-in-out infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-  .admin-btn { font-family: var(--mono); font-size: 0.72rem; padding: 0.4rem 0.85rem; background: transparent; border: 1px solid var(--border2); border-radius: var(--radius); color: var(--text-muted); cursor: pointer; transition: all 0.2s; letter-spacing: 0.03em; }
-  .admin-btn:hover { border-color: var(--accent); color: var(--accent); }
+/* ══ SCROLLBAR ══ */
+::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:var(--bg); } ::-webkit-scrollbar-thumb { background:var(--border2); border-radius:3px; }
 
-  main { max-width: 900px; margin: 0 auto; padding: 3rem 2rem; }
-  .greeting { font-family: var(--mono); font-size: 0.8rem; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.5rem; }
-  h1 { font-size: 2.8rem; font-weight: 300; letter-spacing: -0.04em; color: var(--text); margin-bottom: 0.4rem; line-height: 1.15; }
-  .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 3rem; }
-  section { margin-bottom: 3rem; }
-  .section-label { font-family: var(--mono); font-size: 0.68rem; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.75rem; }
-  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+/* ══ HEADER ══ */
+header { display:flex; align-items:center; justify-content:space-between; padding:1rem 2rem; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--bg); z-index:50; backdrop-filter:blur(8px); }
+.logo { font-family:var(--mono); font-size:.95rem; color:var(--text); letter-spacing:-.02em; }
+.logo em { color:var(--accent); font-style:normal; }
+.header-right { display:flex; align-items:center; gap:1rem; }
+.hdr-clock { font-family:var(--mono); font-size:.7rem; color:var(--text-muted); }
+.dot { width:6px; height:6px; border-radius:50%; background:var(--accent); display:inline-block; margin-right:.4rem; animation:pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:.35} }
+.btn-admin { font-family:var(--mono); font-size:.7rem; padding:.35rem .8rem; background:transparent; border:1px solid var(--border2); border-radius:var(--r); color:var(--text-muted); cursor:pointer; transition:all .18s; }
+.btn-admin:hover { border-color:var(--accent); color:var(--accent); }
 
-  .links-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.75rem; }
-  .link-card { display: block; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.1rem; text-decoration: none; transition: all 0.2s; position: relative; overflow: hidden; }
-  .link-card::before { content: ''; position: absolute; top: 0; left: 0; width: 2px; height: 100%; background: var(--accent); opacity: 0; transition: opacity 0.2s; }
-  .link-card:hover { border-color: var(--border2); background: var(--surface2); }
-  .link-card:hover::before { opacity: 1; }
+/* ══ MAIN ══ */
+main { max-width:1200px; margin:0 auto; padding:2.5rem 2rem 4rem; }
+.hero { margin-bottom:2.5rem; }
+.hero-tag { font-family:var(--mono); font-size:.7rem; color:var(--accent); letter-spacing:.1em; text-transform:uppercase; margin-bottom:.3rem; }
+.hero h1 { font-size:2.4rem; font-weight:300; letter-spacing:-.04em; line-height:1.1; margin-bottom:.3rem; }
+.hero p { color:var(--text-muted); font-size:.88rem; }
 
-  .link-icon-wrap { width: 32px; height: 32px; margin-bottom: 0.6rem; display: flex; align-items: center; justify-content: center; }
-  .link-favicon { width: 28px; height: 28px; object-fit: contain; border-radius: 4px; }
-  .link-favicon-fallback { font-size: 1.4rem; line-height: 1; }
-  .link-name { display: block; font-weight: 500; font-size: 0.88rem; color: var(--text); margin-bottom: 0.2rem; }
-  .link-desc { display: block; font-size: 0.75rem; color: var(--text-muted); }
-  .link-url { font-family: var(--mono); font-size: 0.65rem; color: var(--text-dim); margin-top: 0.6rem; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* ══ SEARCH ══ */
+.search-wrap { margin-bottom:2rem; position:relative; }
+.search-input { width:100%; background:var(--surface); border:1px solid var(--border); border-radius:var(--r2); padding:.65rem 1rem .65rem 2.6rem; color:var(--text); font-family:var(--mono); font-size:.8rem; outline:none; transition:border-color .2s; }
+.search-input:focus { border-color:var(--border2); }
+.search-icon { position:absolute; left:.9rem; top:50%; transform:translateY(-50%); color:var(--text-dim); font-size:.85rem; pointer-events:none; }
 
-  .notes-list { display: flex; flex-direction: column; gap: 0.6rem; }
-  .note-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; }
-  .note-meta { font-family: var(--mono); font-size: 0.65rem; color: var(--text-dim); margin-bottom: 0.35rem; }
-  .note-content { font-size: 0.88rem; color: var(--text); }
+/* ══ SECTION ══ */
+.sec-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; }
+.sec-label { font-family:var(--mono); font-size:.65rem; color:var(--text-dim); letter-spacing:.1em; text-transform:uppercase; display:flex; align-items:center; gap:.6rem; }
+.sec-label::after { content:''; display:inline-block; width:60px; height:1px; background:var(--border); }
+.sec-count { font-family:var(--mono); font-size:.62rem; color:var(--text-dim); }
 
-  .empty { font-family: var(--mono); font-size: 0.78rem; color: var(--text-dim); padding: 1.5rem; border: 1px dashed var(--border); border-radius: var(--radius); text-align: center; }
-  footer { text-align: center; padding: 2rem; font-family: var(--mono); font-size: 0.65rem; color: var(--text-dim); border-top: 1px solid var(--border); }
+/* ══ LINKS GRID ══ */
+.links-grid { display:grid; grid-template-columns:repeat(var(--cols), 1fr); gap:.6rem; margin-bottom:2.5rem; }
+@media(max-width:900px){ .links-grid{ grid-template-columns:repeat(3,1fr); } }
+@media(max-width:600px){ .links-grid{ grid-template-columns:repeat(2,1fr); } }
 
-  /* LOGIN MODAL */
-  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
-  .modal-bg.open { display: flex; }
-  .modal { background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; padding: 2rem; width: 340px; animation: fadeUp 0.2s ease; }
-  @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-  .modal h2 { font-family: var(--mono); font-size: 0.85rem; font-weight: 400; color: var(--text); margin-bottom: 1.5rem; letter-spacing: 0.03em; }
-  .modal label { display: block; font-family: var(--mono); font-size: 0.7rem; color: var(--text-muted); margin-bottom: 0.4rem; letter-spacing: 0.06em; text-transform: uppercase; }
-  .modal input { width: 100%; background: var(--bg); border: 1px solid var(--border2); border-radius: var(--radius); padding: 0.55rem 0.8rem; color: var(--text); font-family: var(--mono); font-size: 0.8rem; margin-bottom: 1rem; outline: none; transition: border-color 0.2s; }
-  .modal input:focus { border-color: var(--accent); }
-  .modal-actions { display: flex; gap: 0.6rem; margin-top: 0.5rem; }
-  .error-msg { font-family: var(--mono); font-size: 0.72rem; color: #f87171; margin-top: -0.5rem; margin-bottom: 0.75rem; display: none; }
+.link-card { display:block; background:var(--surface); border:1px solid var(--border); border-radius:var(--r2); padding:1rem 1.1rem; text-decoration:none; transition:all .18s; position:relative; overflow:hidden; cursor:pointer; }
+.link-card .card-accent-bar { position:absolute; top:0; left:0; right:0; height:2px; opacity:0; transition:opacity .18s; }
+.link-card:hover { border-color:var(--border2); background:var(--surface2); transform:translateY(-1px); box-shadow:0 4px 20px rgba(0,0,0,.3); }
+.link-card:hover .card-accent-bar { opacity:1; }
+.link-card.drag-over { border-color:var(--accent); background:var(--accent-dim); }
+.link-card.dragging { opacity:.4; }
 
-  /* ADMIN PANEL */
-  .admin-panel { display: none; position: fixed; inset: 0; z-index: 200; background: var(--bg); overflow-y: auto; animation: fadeUp 0.2s ease; }
-  .admin-panel.open { display: block; }
-  .admin-header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 10; }
-  .admin-title { font-family: var(--mono); font-size: 0.85rem; color: var(--accent); letter-spacing: 0.05em; }
-  .close-btn { font-family: var(--mono); font-size: 0.72rem; padding: 0.4rem 0.85rem; background: transparent; border: 1px solid var(--border2); border-radius: var(--radius); color: var(--text-muted); cursor: pointer; transition: all 0.2s; }
-  .close-btn:hover { border-color: #f87171; color: #f87171; }
-  .admin-body { max-width: 700px; margin: 0 auto; padding: 2rem; }
-  .admin-section { margin-bottom: 2.5rem; }
-  .admin-section-title { font-family: var(--mono); font-size: 0.72rem; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1rem; }
-  .add-form { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; margin-bottom: 1rem; }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem; }
-  .form-col { display: flex; flex-direction: column; }
-  .form-label { font-family: var(--mono); font-size: 0.65rem; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.35rem; }
-  .form-input { background: var(--bg); border: 1px solid var(--border2); border-radius: var(--radius); padding: 0.5rem 0.7rem; color: var(--text); font-family: var(--mono); font-size: 0.78rem; outline: none; transition: border-color 0.2s; width: 100%; }
-  .form-input:focus { border-color: var(--accent); }
-  textarea.form-input { resize: vertical; min-height: 60px; }
-  .form-actions { display: flex; gap: 0.6rem; margin-top: 1rem; align-items: center; }
+.card-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:.6rem; }
+.card-icon-wrap { width:34px; height:34px; display:flex; align-items:center; justify-content:center; border-radius:8px; background:var(--surface2); border:1px solid var(--border); overflow:hidden; }
+.card-favicon { width:22px; height:22px; object-fit:contain; }
+.card-emoji { font-size:1.1rem; line-height:1; }
+.card-tag { font-family:var(--mono); font-size:.58rem; color:var(--text-dim); letter-spacing:.06em; background:var(--surface2); border:1px solid var(--border); border-radius:4px; padding:.1rem .4rem; white-space:nowrap; }
 
-  .btn-primary { flex: 1; background: var(--accent); border: none; border-radius: var(--radius); padding: 0.6rem; color: #0a1a10; font-family: var(--mono); font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
-  .btn-primary:hover { opacity: 0.85; }
-  .btn-secondary { background: transparent; border: 1px solid var(--border2); border-radius: var(--radius); padding: 0.6rem 1rem; color: var(--text-muted); font-family: var(--mono); font-size: 0.78rem; cursor: pointer; transition: all 0.2s; }
-  .btn-secondary:hover { border-color: var(--text-muted); color: var(--text); }
-  .btn-add { background: var(--accent-dim); border: 1px solid var(--accent); border-radius: var(--radius); padding: 0.5rem 1rem; color: var(--accent); font-family: var(--mono); font-size: 0.75rem; cursor: pointer; transition: all 0.2s; }
-  .btn-add:hover { background: var(--accent); color: #0a1a10; font-weight: 700; }
-  .btn-add:disabled { opacity: 0.4; cursor: not-allowed; }
+.card-name { font-weight:500; font-size:.85rem; color:var(--text); margin-bottom:.15rem; line-height:1.3; }
+.card-desc { font-size:.72rem; color:var(--text-muted); line-height:1.4; margin-bottom:.5rem; }
+.card-url { font-family:var(--mono); font-size:.6rem; color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-  .item-row { display: flex; align-items: center; justify-content: space-between; padding: 0.7rem 1rem; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 0.4rem; background: var(--surface); gap: 1rem; }
-  .item-favicon { width: 20px; height: 20px; object-fit: contain; border-radius: 3px; flex-shrink: 0; }
-  .item-favicon-fallback { font-size: 1rem; flex-shrink: 0; }
-  .item-info { flex: 1; min-width: 0; }
-  .item-name { font-size: 0.85rem; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .item-detail { font-family: var(--mono); font-size: 0.65rem; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .delete-btn { background: transparent; border: 1px solid var(--border); border-radius: var(--radius); padding: 0.3rem 0.6rem; color: var(--text-dim); font-family: var(--mono); font-size: 0.65rem; cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
-  .delete-btn:hover { border-color: #f87171; color: #f87171; }
+/* ══ COMPACT MODE ══ */
+body.compact .link-card { padding:.65rem .85rem; }
+body.compact .card-icon-wrap { width:26px; height:26px; border-radius:6px; }
+body.compact .card-favicon { width:16px; height:16px; }
+body.compact .card-emoji { font-size:.85rem; }
+body.compact .card-name { font-size:.8rem; }
+body.compact .card-desc { display:none; }
+body.compact .card-url { display:none; }
+body.compact .card-top { margin-bottom:.3rem; }
 
-  /* META PREVIEW in form */
-  .meta-preview { display: none; align-items: center; gap: 0.6rem; padding: 0.5rem 0.7rem; background: var(--bg); border: 1px solid var(--border2); border-radius: var(--radius); margin-bottom: 0.75rem; }
-  .meta-preview.visible { display: flex; }
-  .meta-preview img { width: 20px; height: 20px; object-fit: contain; border-radius: 3px; }
-  .meta-preview-title { font-family: var(--mono); font-size: 0.72rem; color: var(--text-muted); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .meta-spinner { font-family: var(--mono); font-size: 0.7rem; color: var(--text-dim); display: none; margin-bottom: 0.75rem; }
-  .meta-spinner.visible { display: block; }
+/* ══ NOTES ══ */
+.notes-list { display:flex; flex-direction:column; gap:.5rem; }
+.note-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:.85rem 1.1rem; }
+.note-meta { font-family:var(--mono); font-size:.6rem; color:var(--text-dim); margin-bottom:.3rem; }
+.note-text { font-size:.85rem; color:var(--text); line-height:1.55; }
 
-  .toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--accent-dim); border: 1px solid var(--accent); border-radius: var(--radius); padding: 0.6rem 1.2rem; font-family: var(--mono); font-size: 0.75rem; color: var(--accent); opacity: 0; transition: all 0.3s; z-index: 999; pointer-events: none; }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  .toast.error { background: #2a1010; border-color: #f87171; color: #f87171; }
+.empty { font-family:var(--mono); font-size:.75rem; color:var(--text-dim); padding:2rem; border:1px dashed var(--border); border-radius:var(--r2); text-align:center; grid-column:1/-1; }
+
+footer { text-align:center; padding:1.5rem; font-family:var(--mono); font-size:.6rem; color:var(--text-dim); border-top:1px solid var(--border); }
+
+/* ══════════════════════════════════════
+   ADMIN OVERLAY
+══════════════════════════════════════ */
+.admin-overlay { display:none; position:fixed; inset:0; z-index:300; }
+.admin-overlay.open { display:flex; }
+
+.admin-backdrop { position:absolute; inset:0; background:rgba(0,0,0,.6); backdrop-filter:blur(6px); }
+
+.admin-shell { position:relative; display:flex; width:100%; height:100%; max-width:1000px; margin:0 auto; animation:slideIn .22s ease; }
+@keyframes slideIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+/* sidebar */
+.admin-sidebar { width:200px; flex-shrink:0; background:var(--surface); border-right:1px solid var(--border); display:flex; flex-direction:column; padding:1.25rem 0; }
+.admin-logo { font-family:var(--mono); font-size:.75rem; color:var(--accent); padding:0 1.25rem 1.25rem; border-bottom:1px solid var(--border); margin-bottom:.75rem; letter-spacing:.05em; }
+.admin-nav-item { display:flex; align-items:center; gap:.6rem; padding:.55rem 1.25rem; font-family:var(--mono); font-size:.72rem; color:var(--text-muted); cursor:pointer; transition:all .15s; border-left:2px solid transparent; }
+.admin-nav-item:hover { color:var(--text); background:var(--surface2); }
+.admin-nav-item.active { color:var(--accent); border-left-color:var(--accent); background:var(--accent-dim); }
+.admin-nav-icon { width:14px; text-align:center; opacity:.7; }
+.admin-spacer { flex:1; }
+.admin-close-btn { display:flex; align-items:center; gap:.5rem; padding:.55rem 1.25rem; font-family:var(--mono); font-size:.7rem; color:var(--text-dim); cursor:pointer; transition:all .15s; }
+.admin-close-btn:hover { color:var(--red); }
+
+/* main content */
+.admin-main { flex:1; background:var(--bg); overflow-y:auto; }
+.admin-tab { display:none; padding:2rem; }
+.admin-tab.active { display:block; }
+.admin-tab-title { font-family:var(--mono); font-size:.7rem; color:var(--text-muted); letter-spacing:.08em; text-transform:uppercase; margin-bottom:1.5rem; padding-bottom:.75rem; border-bottom:1px solid var(--border); }
+
+/* ── FORM COMPONENTS ── */
+.card-form { background:var(--surface); border:1px solid var(--border); border-radius:var(--r2); padding:1.25rem; margin-bottom:1rem; }
+.form-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; }
+.form-grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:.75rem; }
+.field { display:flex; flex-direction:column; gap:.3rem; margin-bottom:.65rem; }
+.field:last-child { margin-bottom:0; }
+.field-label { font-family:var(--mono); font-size:.62rem; color:var(--text-muted); letter-spacing:.07em; text-transform:uppercase; }
+.field-input { background:var(--bg); border:1px solid var(--border2); border-radius:var(--r); padding:.5rem .75rem; color:var(--text); font-family:var(--mono); font-size:.78rem; outline:none; transition:border-color .18s; width:100%; }
+.field-input:focus { border-color:var(--accent); }
+.field-input::placeholder { color:var(--text-dim); }
+textarea.field-input { resize:vertical; min-height:70px; font-family:var(--sans); }
+
+/* color picker row */
+.color-row { display:flex; gap:.4rem; flex-wrap:wrap; margin-top:.2rem; }
+.color-chip { width:22px; height:22px; border-radius:50%; border:2px solid transparent; cursor:pointer; transition:transform .15s; }
+.color-chip:hover { transform:scale(1.15); }
+.color-chip.selected { border-color:white; }
+.color-chip.none { background:var(--surface3); border-color:var(--border2); }
+
+/* meta preview */
+.meta-preview { display:none; align-items:center; gap:.6rem; padding:.5rem .75rem; background:var(--surface2); border:1px solid var(--border2); border-radius:var(--r); margin-bottom:.65rem; font-family:var(--mono); font-size:.7rem; color:var(--text-muted); }
+.meta-preview.show { display:flex; }
+.meta-preview img { width:18px; height:18px; object-fit:contain; border-radius:3px; }
+.meta-spinner { font-family:var(--mono); font-size:.68rem; color:var(--text-dim); display:none; margin-bottom:.65rem; }
+.meta-spinner.show { display:block; }
+
+/* buttons */
+.btn { font-family:var(--mono); font-size:.72rem; padding:.5rem 1rem; border-radius:var(--r); cursor:pointer; transition:all .18s; border:1px solid transparent; }
+.btn-green { background:var(--accent-dim); border-color:var(--accent); color:var(--accent); }
+.btn-green:hover { background:var(--accent); color:#071a0c; font-weight:700; }
+.btn-green:disabled { opacity:.35; cursor:not-allowed; }
+.btn-ghost { background:transparent; border-color:var(--border2); color:var(--text-muted); }
+.btn-ghost:hover { border-color:var(--border3); color:var(--text); }
+.btn-red { background:var(--red-dim); border-color:var(--red); color:var(--red); }
+.btn-red:hover { background:var(--red); color:#1a0606; }
+
+.form-footer { display:flex; align-items:center; gap:.6rem; margin-top:.85rem; padding-top:.85rem; border-top:1px solid var(--border); }
+
+/* ── LINK LIST IN ADMIN ── */
+.link-list { display:flex; flex-direction:column; gap:.4rem; }
+.link-row { display:flex; align-items:center; gap:.75rem; padding:.65rem .85rem; background:var(--surface); border:1px solid var(--border); border-radius:var(--r); cursor:grab; transition:all .15s; }
+.link-row:hover { border-color:var(--border2); }
+.link-row.drag-over-row { border-color:var(--accent); background:var(--accent-dim); }
+.link-row.dragging-row { opacity:.4; cursor:grabbing; }
+.drag-handle { color:var(--text-dim); font-size:.8rem; cursor:grab; user-select:none; flex-shrink:0; }
+.row-favicon { width:20px; height:20px; object-fit:contain; border-radius:3px; flex-shrink:0; }
+.row-emoji { font-size:.9rem; flex-shrink:0; }
+.row-info { flex:1; min-width:0; }
+.row-name { font-size:.82rem; font-weight:500; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.row-url { font-family:var(--mono); font-size:.6rem; color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.row-color-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.row-actions { display:flex; gap:.35rem; flex-shrink:0; }
+.row-btn { font-family:var(--mono); font-size:.62rem; padding:.25rem .55rem; border-radius:5px; cursor:pointer; border:1px solid var(--border); background:transparent; color:var(--text-dim); transition:all .15s; }
+.row-btn:hover { border-color:var(--border3); color:var(--text); }
+.row-btn.del:hover { border-color:var(--red); color:var(--red); }
+
+/* ── INLINE EDIT ── */
+.inline-edit { display:none; background:var(--surface2); border:1px solid var(--border2); border-radius:var(--r); padding:1rem; margin-top:.4rem; }
+.inline-edit.show { display:block; }
+
+/* ── SETTINGS ── */
+.settings-group { margin-bottom:1.5rem; }
+.settings-group-title { font-family:var(--mono); font-size:.65rem; color:var(--text-dim); letter-spacing:.08em; text-transform:uppercase; margin-bottom:.75rem; }
+.setting-row { display:flex; align-items:center; justify-content:space-between; padding:.65rem 0; border-bottom:1px solid var(--border); }
+.setting-row:last-child { border-bottom:none; }
+.setting-label { font-size:.85rem; color:var(--text); }
+.setting-desc { font-size:.72rem; color:var(--text-muted); margin-top:.15rem; }
+.range-wrap { display:flex; align-items:center; gap:.75rem; }
+.range-val { font-family:var(--mono); font-size:.8rem; color:var(--accent); min-width:1.5rem; text-align:center; }
+input[type=range] { -webkit-appearance:none; width:120px; height:4px; border-radius:2px; background:var(--border2); outline:none; cursor:pointer; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:var(--accent); cursor:pointer; }
+
+/* toggle */
+.toggle { position:relative; width:36px; height:20px; cursor:pointer; }
+.toggle input { display:none; }
+.toggle-track { position:absolute; inset:0; background:var(--border2); border-radius:10px; transition:background .18s; }
+.toggle input:checked ~ .toggle-track { background:var(--accent); }
+.toggle-thumb { position:absolute; top:3px; left:3px; width:14px; height:14px; border-radius:50%; background:white; transition:left .18s; }
+.toggle input:checked ~ .toggle-track .toggle-thumb { left:19px; }
+
+/* ── LOGIN ── */
+.login-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:400; align-items:center; justify-content:center; backdrop-filter:blur(6px); }
+.login-bg.open { display:flex; }
+.login-box { background:var(--surface); border:1px solid var(--border2); border-radius:var(--r2); padding:2rem; width:320px; animation:slideIn .2s ease; }
+.login-title { font-family:var(--mono); font-size:.8rem; color:var(--text); margin-bottom:1.5rem; letter-spacing:.03em; }
+.login-err { font-family:var(--mono); font-size:.68rem; color:var(--red); display:none; margin-bottom:.65rem; }
+.login-actions { display:flex; gap:.5rem; margin-top:.5rem; }
+
+/* ── TOAST ── */
+.toast { position:fixed; bottom:1.75rem; left:50%; transform:translateX(-50%) translateY(16px); background:var(--surface2); border:1px solid var(--border2); border-radius:var(--r); padding:.55rem 1.1rem; font-family:var(--mono); font-size:.72rem; color:var(--text); opacity:0; transition:all .25s; z-index:999; pointer-events:none; white-space:nowrap; }
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+.toast.ok { border-color:var(--accent); color:var(--accent); background:var(--accent-dim); }
+.toast.err { border-color:var(--red); color:var(--red); background:var(--red-dim); }
 </style>
 </head>
 <body>
 
+<!-- ══ HEADER ══ -->
 <header>
-  <div class="logo"><span>//</span> jarvis</div>
-  <div class="status-bar">
-    <span><span class="dot"></span>&nbsp; online</span>
-    <span id="clock"></span>
+  <div class="logo"><em>//</em> jarvis</div>
+  <div class="header-right">
+    <span class="hdr-clock"><span class="dot"></span><span id="clock"></span></span>
+    <button class="btn-admin" onclick="openLogin()">admin →</button>
   </div>
-  <button class="admin-btn" onclick="openLogin()">admin →</button>
 </header>
 
+<!-- ══ MAIN ══ -->
 <main>
-  <div class="greeting">good <span id="timeOfDay">morning</span></div>
-  <h1>jarvis</h1>
-  <p class="subtitle">your local services, in one place.</p>
-  <section>
-    <div class="section-label">services</div>
-    <div class="links-grid" id="linksGrid"><div class="empty">loading...</div></div>
-  </section>
-  <section>
-    <div class="section-label">notes</div>
-    <div class="notes-list" id="notesList"><div class="empty">loading...</div></div>
-  </section>
+  <div class="hero">
+    <div class="hero-tag">good <span id="timeOfDay">morning</span></div>
+    <h1>jarvis</h1>
+    <p>your local services, in one place.</p>
+  </div>
+
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input class="search-input" id="searchInput" type="text" placeholder="filter services..." oninput="filterCards()">
+  </div>
+
+  <div class="sec-head">
+    <div class="sec-label">services</div>
+    <div class="sec-count" id="linkCount"></div>
+  </div>
+  <div class="links-grid" id="linksGrid"><div class="empty">loading...</div></div>
+
+  <div class="sec-head" style="margin-top:1rem">
+    <div class="sec-label">notes</div>
+  </div>
+  <div class="notes-list" id="notesList"><div class="empty">loading...</div></div>
 </main>
 
-<footer>jarvis &middot; running on your lan &middot; <span id="footerDate"></span></footer>
+<footer id="footerDate"></footer>
 
-<!-- LOGIN MODAL -->
-<div class="modal-bg" id="loginModal">
-  <div class="modal">
-    <h2>// admin access</h2>
-    <label>username</label>
-    <input type="text" id="usernameInput" placeholder="username" autocomplete="username">
-    <label>password</label>
-    <input type="password" id="passwordInput" placeholder="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')tryLogin()">
-    <div class="error-msg" id="loginError">invalid credentials</div>
-    <div class="modal-actions">
-      <button class="btn-primary" onclick="tryLogin()">unlock</button>
-      <button class="btn-secondary" onclick="closeLogin()">cancel</button>
+<!-- ══ LOGIN ══ -->
+<div class="login-bg" id="loginBg">
+  <div class="login-box">
+    <div class="login-title">// admin access</div>
+    <div class="field">
+      <label class="field-label">username</label>
+      <input class="field-input" id="loginUser" type="text" autocomplete="username">
+    </div>
+    <div class="field">
+      <label class="field-label">password</label>
+      <input class="field-input" id="loginPass" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')tryLogin()">
+    </div>
+    <div class="login-err" id="loginErr">invalid credentials</div>
+    <div class="login-actions">
+      <button class="btn btn-green" style="flex:1" onclick="tryLogin()">unlock</button>
+      <button class="btn btn-ghost" onclick="closeLogin()">cancel</button>
     </div>
   </div>
 </div>
 
-<!-- ADMIN PANEL -->
-<div class="admin-panel" id="adminPanel">
-  <div class="admin-header">
-    <div class="admin-title">// admin panel</div>
-    <button class="close-btn" onclick="closeAdmin()">✕ close</button>
-  </div>
-  <div class="admin-body">
+<!-- ══ ADMIN OVERLAY ══ -->
+<div class="admin-overlay" id="adminOverlay">
+  <div class="admin-backdrop" onclick="closeAdmin()"></div>
+  <div class="admin-shell">
 
-    <div class="admin-section">
-      <div class="admin-section-title">credentials</div>
-      <div class="add-form">
-        <div class="form-row">
-          <div class="form-col">
-            <label class="form-label">username</label>
-            <input class="form-input" type="text" id="newUsername" placeholder="new username" autocomplete="off">
-          </div>
-          <div class="form-col">
-            <label class="form-label">&nbsp;</label>
-            <div style="font-family:var(--mono);font-size:0.65rem;color:var(--text-dim);padding-top:0.35rem;">leave password blank to keep current</div>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-col">
-            <label class="form-label">new password</label>
-            <input class="form-input" type="password" id="newPassword" placeholder="new password" autocomplete="new-password">
-          </div>
-          <div class="form-col">
-            <label class="form-label">confirm password</label>
-            <input class="form-input" type="password" id="confirmPassword" placeholder="confirm" autocomplete="new-password">
-          </div>
-        </div>
-        <div class="form-actions">
-          <button class="btn-add" onclick="saveCredentials()">update credentials</button>
-        </div>
+    <!-- sidebar -->
+    <div class="admin-sidebar">
+      <div class="admin-logo">// admin</div>
+      <div class="admin-nav-item active" onclick="switchTab('services')" id="nav-services">
+        <span class="admin-nav-icon">◈</span> services
       </div>
+      <div class="admin-nav-item" onclick="switchTab('notes')" id="nav-notes">
+        <span class="admin-nav-icon">◇</span> notes
+      </div>
+      <div class="admin-nav-item" onclick="switchTab('layout')" id="nav-layout">
+        <span class="admin-nav-icon">⊞</span> layout
+      </div>
+      <div class="admin-nav-item" onclick="switchTab('security')" id="nav-security">
+        <span class="admin-nav-icon">◉</span> security
+      </div>
+      <div class="admin-spacer"></div>
+      <div class="admin-close-btn" onclick="closeAdmin()">✕ close panel</div>
     </div>
 
-    <div class="admin-section">
-      <div class="admin-section-title">services / links</div>
-      <div class="add-form">
-        <div class="form-col" style="margin-bottom:0.75rem">
-          <label class="form-label">url — paste first, we'll fetch the rest</label>
-          <input class="form-input" type="url" id="linkUrl" placeholder="http://192.168.1.x:8096" onblur="autoFetchMeta()">
-        </div>
-        <div class="meta-spinner" id="metaSpinner">// fetching site info...</div>
-        <div class="meta-preview" id="metaPreview">
-          <img id="metaFaviconPreview" src="" alt="">
-          <span class="meta-preview-title" id="metaTitlePreview"></span>
-        </div>
-        <div class="form-row">
-          <div class="form-col">
-            <label class="form-label">name</label>
-            <input class="form-input" type="text" id="linkName" placeholder="Jellyfin">
+    <!-- main -->
+    <div class="admin-main">
+
+      <!-- ── SERVICES TAB ── -->
+      <div class="admin-tab active" id="tab-services">
+        <div class="admin-tab-title">services / links</div>
+
+        <div class="card-form">
+          <div class="field">
+            <label class="field-label">url — paste first</label>
+            <input class="field-input" id="addUrl" type="url" placeholder="http://192.168.1.x:8096" onblur="autoFetchMeta()">
           </div>
-          <div class="form-col">
-            <label class="form-label">icon override (emoji)</label>
-            <input class="form-input" type="text" id="linkIcon" placeholder="leave blank to use favicon" maxlength="4">
+          <div class="meta-spinner" id="metaSpinner">fetching site info...</div>
+          <div class="meta-preview" id="metaPreview">
+            <img id="metaFavicon" src="" alt="">
+            <span id="metaTitle"></span>
+          </div>
+          <div class="form-grid-2">
+            <div class="field">
+              <label class="field-label">name</label>
+              <input class="field-input" id="addName" type="text" placeholder="Jellyfin">
+            </div>
+            <div class="field">
+              <label class="field-label">emoji override</label>
+              <input class="field-input" id="addIcon" type="text" placeholder="leave blank = favicon" maxlength="4">
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">description</label>
+            <input class="field-input" id="addDesc" type="text" placeholder="Media server">
+          </div>
+          <div class="field">
+            <label class="field-label">accent colour</label>
+            <div class="color-row" id="addColorRow"></div>
+          </div>
+          <div class="form-footer">
+            <button class="btn btn-green" id="addLinkBtn" onclick="addLink()">+ add service</button>
           </div>
         </div>
-        <div class="form-col">
-          <label class="form-label">description</label>
-          <input class="form-input" type="text" id="linkDesc" placeholder="Media server">
+
+        <div class="link-list" id="adminLinkList"></div>
+      </div>
+
+      <!-- ── NOTES TAB ── -->
+      <div class="admin-tab" id="tab-notes">
+        <div class="admin-tab-title">notes &amp; announcements</div>
+        <div class="card-form">
+          <div class="field">
+            <label class="field-label">new note</label>
+            <textarea class="field-input" id="addNoteContent" placeholder="Write a note, reminder, or announcement..."></textarea>
+          </div>
+          <div class="form-footer">
+            <button class="btn btn-green" id="addNoteBtn" onclick="addNote()">+ add note</button>
+          </div>
         </div>
-        <div class="form-actions">
-          <button class="btn-add" id="addLinkBtn" onclick="addLink()">+ add service</button>
+        <div id="adminNoteList"></div>
+      </div>
+
+      <!-- ── LAYOUT TAB ── -->
+      <div class="admin-tab" id="tab-layout">
+        <div class="admin-tab-title">layout &amp; display</div>
+        <div class="settings-group">
+          <div class="settings-group-title">grid</div>
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">columns</div>
+              <div class="setting-desc">number of card columns on desktop</div>
+            </div>
+            <div class="range-wrap">
+              <span class="range-val" id="colsVal">4</span>
+              <input type="range" id="colsRange" min="2" max="8" value="4" oninput="previewCols(this.value)" onchange="saveCols(this.value)">
+            </div>
+          </div>
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">compact mode</div>
+              <div class="setting-desc">smaller cards, hides description and url</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="compactToggle" onchange="saveCompact(this.checked)">
+              <div class="toggle-track"><div class="toggle-thumb"></div></div>
+            </label>
+          </div>
         </div>
       </div>
-      <div id="adminLinks"></div>
-    </div>
 
-    <div class="admin-section">
-      <div class="admin-section-title">notes</div>
-      <div class="add-form">
-        <label class="form-label">note content</label>
-        <textarea class="form-input" id="noteContent" placeholder="Write a note, reminder, or announcement..."></textarea>
-        <div class="form-actions">
-          <button class="btn-add" id="addNoteBtn" onclick="addNote()">+ add note</button>
+      <!-- ── SECURITY TAB ── -->
+      <div class="admin-tab" id="tab-security">
+        <div class="admin-tab-title">credentials</div>
+        <div class="card-form">
+          <div class="field">
+            <label class="field-label">username</label>
+            <input class="field-input" id="secUser" type="text" autocomplete="off">
+          </div>
+          <div class="form-grid-2">
+            <div class="field">
+              <label class="field-label">new password</label>
+              <input class="field-input" id="secPass" type="password" placeholder="leave blank to keep" autocomplete="new-password">
+            </div>
+            <div class="field">
+              <label class="field-label">confirm</label>
+              <input class="field-input" id="secPassConfirm" type="password" autocomplete="new-password">
+            </div>
+          </div>
+          <div class="form-footer">
+            <button class="btn btn-green" onclick="saveCredentials()">update credentials</button>
+          </div>
         </div>
       </div>
-      <div id="adminNotes"></div>
-    </div>
 
-  </div>
-</div>
+    </div><!-- /admin-main -->
+  </div><!-- /admin-shell -->
+</div><!-- /admin-overlay -->
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ── STATE ──
-let pendingFaviconUrl = null;
+// ══════════════════════════════════════
+// STATE
+// ══════════════════════════════════════
+const COLORS = [
+  { label:'none', val:null },
+  { label:'green', val:'#4ade80' },
+  { label:'blue', val:'#38bdf8' },
+  { label:'purple', val:'#a78bfa' },
+  { label:'orange', val:'#fb923c' },
+  { label:'red', val:'#f87171' },
+  { label:'yellow', val:'#facc15' },
+  { label:'pink', val:'#f472b6' },
+];
 
-// ── CLOCK ──
+let state = { links:[], notes:[], settings:{ columns:4, compactMode:false } };
+let pendingFavicon = null;
+let addColor = null;
+let dragSrcIdx = null;
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+async function init() {
+  updateClock();
+  setInterval(updateClock, 1000);
+  buildColorPicker('addColorRow', c => { addColor = c; });
+  await loadData();
+}
+
+async function loadData() {
+  try {
+    const d = await apiFetch('GET', '/api/data');
+    state = d;
+    applySettings(d.settings);
+    renderLinks(d.links);
+    renderNotes(d.notes);
+  } catch {}
+}
+
+// ══════════════════════════════════════
+// CLOCK
+// ══════════════════════════════════════
 function updateClock() {
   const now = new Date(), h = now.getHours();
-  document.getElementById('clock').textContent = now.toLocaleTimeString('en-IE', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-  document.getElementById('timeOfDay').textContent = h < 12 ? 'morning' : h < 18 ? 'afternoon' : 'evening';
-  document.getElementById('footerDate').textContent = now.toLocaleDateString('en-IE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  document.getElementById('clock').textContent = now.toLocaleTimeString('en-IE',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+  document.getElementById('timeOfDay').textContent = h<12?'morning':h<18?'afternoon':'evening';
+  document.getElementById('footerDate').textContent = 'jarvis · ' + now.toLocaleDateString('en-IE',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 }
-setInterval(updateClock, 1000); updateClock();
 
-// ── UTILS ──
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+// ══════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-function toast(msg, isError=false) {
+function toast(msg, type='ok') {
   const el = document.getElementById('toast');
-  el.textContent = msg; el.className = 'toast show' + (isError ? ' error' : '');
-  setTimeout(() => el.className = 'toast', 2500);
+  el.textContent = msg; el.className = `toast show ${type}`;
+  clearTimeout(el._t); el._t = setTimeout(()=>el.className='toast', 2400);
 }
 
-async function api(method, path, body) {
-  const res = await fetch(path, { method, headers: {'Content-Type':'application/json'}, body: body ? JSON.stringify(body) : undefined });
+async function apiFetch(method, path, body) {
+  const res = await fetch(path, { method, headers:{'Content-Type':'application/json'}, body: body?JSON.stringify(body):undefined });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'request failed');
+  if (!res.ok) throw new Error(data.error||'error');
   return data;
 }
 
-function faviconImg(faviconUrl, fallback, cls, size) {
-  if (faviconUrl) {
-    const proxied = '/api/proxy-favicon?url=' + encodeURIComponent(faviconUrl);
-    return `<img class="${cls}" src="${esc(proxied)}" width="${size}" height="${size}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'">
-            <span class="${cls}-fallback" style="display:none">${esc(fallback||'🔗')}</span>`;
-  }
-  return `<span class="${cls}-fallback">${esc(fallback||'🔗')}</span>`;
+function faviconSrc(url) { return '/api/proxy-favicon?url='+encodeURIComponent(url); }
+
+function renderFavicon(link, cls, size) {
+  if (link.faviconUrl)
+    return `<img class="${cls}" src="${esc(faviconSrc(link.faviconUrl))}" width="${size}" height="${size}" alt="" onerror="this.style.display='none';this.nextSibling&&(this.nextSibling.style.display='')">
+            <span style="display:none;font-size:${size>18?'1.1':'0.9'}rem">${esc(link.icon||'🔗')}</span>`;
+  return `<span style="font-size:${size>18?'1.1':'0.9'}rem">${esc(link.icon||'🔗')}</span>`;
 }
 
-// ── PUBLIC RENDER ──
-async function loadPublic() {
-  try {
-    const [links, notes] = await Promise.all([fetch('/api/links').then(r=>r.json()), fetch('/api/notes').then(r=>r.json())]);
-    renderLinks(links); renderNotes(notes);
-  } catch {}
+function buildColorPicker(containerId, onChange) {
+  const row = document.getElementById(containerId);
+  row.innerHTML = '';
+  COLORS.forEach(c => {
+    const chip = document.createElement('div');
+    chip.className = 'color-chip' + (c.val===null?' none':'');
+    if (c.val) chip.style.background = c.val;
+    chip.title = c.label;
+    chip.onclick = () => {
+      row.querySelectorAll('.color-chip').forEach(ch=>ch.classList.remove('selected'));
+      chip.classList.add('selected');
+      onChange(c.val);
+    };
+    row.appendChild(chip);
+  });
+  row.querySelector('.color-chip').classList.add('selected'); // default: none
+}
+
+// ══════════════════════════════════════
+// PUBLIC RENDER
+// ══════════════════════════════════════
+function applySettings(s) {
+  const cols = s.columns || 4;
+  document.documentElement.style.setProperty('--cols', cols);
+  document.getElementById('colsRange').value = cols;
+  document.getElementById('colsVal').textContent = cols;
+  document.body.classList.toggle('compact', !!s.compactMode);
+  document.getElementById('compactToggle').checked = !!s.compactMode;
 }
 
 function renderLinks(links) {
   const grid = document.getElementById('linksGrid');
-  if (!links.length) { grid.innerHTML = '<div class="empty">no services yet — add some in the admin panel</div>'; return; }
-  grid.innerHTML = links.map(l => `
-    <a class="link-card" href="${esc(l.url)}" target="_blank" rel="noopener">
-      <div class="link-icon-wrap">
-        ${faviconImg(l.faviconUrl, l.icon||'🔗', 'link-favicon', 28)}
+  document.getElementById('linkCount').textContent = links.length ? `${links.length} services` : '';
+  if (!links.length) { grid.innerHTML = '<div class="empty">no services yet — add some in admin</div>'; return; }
+  grid.innerHTML = links.map((l,i) => {
+    const color = l.color || 'var(--accent)';
+    return `<a class="link-card" href="${esc(l.url)}" target="_blank" rel="noopener" data-idx="${i}" data-name="${esc((l.name||'').toLowerCase())}" data-desc="${esc((l.desc||'').toLowerCase())}">
+      <div class="card-accent-bar" style="background:${esc(color)}"></div>
+      <div class="card-top">
+        <div class="card-icon-wrap">${renderFavicon(l,'card-favicon',22)}</div>
       </div>
-      <span class="link-name">${esc(l.name)}</span>
-      <span class="link-desc">${esc(l.desc)}</span>
-      <span class="link-url">${esc(l.url)}</span>
-    </a>`).join('');
+      <div class="card-name">${esc(l.name)}</div>
+      ${l.desc?`<div class="card-desc">${esc(l.desc)}</div>`:''}
+      <div class="card-url">${esc(l.url)}</div>
+    </a>`;
+  }).join('');
 }
 
 function renderNotes(notes) {
   const list = document.getElementById('notesList');
-  if (!notes.length) { list.innerHTML = '<div class="empty">no notes yet — add some in the admin panel</div>'; return; }
-  list.innerHTML = notes.map(n => `
+  if (!notes.length) { list.innerHTML = '<div class="empty">no notes yet</div>'; return; }
+  list.innerHTML = notes.map(n=>`
     <div class="note-card">
       <div class="note-meta">${esc(n.date)}</div>
-      <div class="note-content">${esc(n.content)}</div>
+      <div class="note-text">${esc(n.content)}</div>
     </div>`).join('');
 }
 
-// ── META AUTO-FETCH ──
-async function autoFetchMeta() {
-  let url = document.getElementById('linkUrl').value.trim();
-  if (!url) return;
-  if (!/^https?:\/\//i.test(url)) url = 'http://' + url;
-
-  pendingFaviconUrl = null;
-  document.getElementById('metaPreview').classList.remove('visible');
-  document.getElementById('metaSpinner').classList.add('visible');
-
-  try {
-    const res = await fetch('/api/fetch-meta?url=' + encodeURIComponent(url));
-    const meta = await res.json();
-    document.getElementById('metaSpinner').classList.remove('visible');
-
-    if (meta.title || meta.faviconUrl) {
-      if (meta.title && !document.getElementById('linkName').value) {
-        document.getElementById('linkName').value = meta.title;
-      }
-      pendingFaviconUrl = meta.faviconUrl;
-      const preview = document.getElementById('metaPreview');
-      const imgEl = document.getElementById('metaFaviconPreview');
-      const titleEl = document.getElementById('metaTitlePreview');
-      if (meta.faviconUrl) {
-        imgEl.src = '/api/proxy-favicon?url=' + encodeURIComponent(meta.faviconUrl);
-        imgEl.style.display = '';
-      } else {
-        imgEl.style.display = 'none';
-      }
-      titleEl.textContent = meta.title || url;
-      preview.classList.add('visible');
-    }
-  } catch {
-    document.getElementById('metaSpinner').classList.remove('visible');
-  }
+function filterCards() {
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  document.querySelectorAll('.link-card').forEach(card => {
+    const match = !q || card.dataset.name.includes(q) || card.dataset.desc.includes(q);
+    card.style.display = match ? '' : 'none';
+  });
 }
 
-// ── LOGIN ──
+// ══════════════════════════════════════
+// LOGIN
+// ══════════════════════════════════════
 function openLogin() {
-  document.getElementById('loginModal').classList.add('open');
-  document.getElementById('usernameInput').value = '';
-  document.getElementById('passwordInput').value = '';
-  document.getElementById('loginError').style.display = 'none';
-  setTimeout(() => document.getElementById('usernameInput').focus(), 100);
+  document.getElementById('loginBg').classList.add('open');
+  document.getElementById('loginUser').value=''; document.getElementById('loginPass').value='';
+  document.getElementById('loginErr').style.display='none';
+  setTimeout(()=>document.getElementById('loginUser').focus(),80);
 }
-function closeLogin() { document.getElementById('loginModal').classList.remove('open'); }
+function closeLogin() { document.getElementById('loginBg').classList.remove('open'); }
 
 async function tryLogin() {
-  const username = document.getElementById('usernameInput').value;
-  const password = document.getElementById('passwordInput').value;
   try {
-    await api('POST', '/api/login', { username, password });
+    await apiFetch('POST','/api/login',{username:document.getElementById('loginUser').value, password:document.getElementById('loginPass').value});
     closeLogin(); openAdmin();
   } catch {
-    document.getElementById('loginError').style.display = 'block';
-    document.getElementById('passwordInput').value = '';
-    document.getElementById('passwordInput').focus();
+    document.getElementById('loginErr').style.display='block';
+    document.getElementById('loginPass').value='';
+    document.getElementById('loginPass').focus();
   }
 }
+document.getElementById('loginBg').addEventListener('click',e=>{if(e.target===e.currentTarget)closeLogin();});
 
-// ── ADMIN ──
-async function openAdmin() {
-  document.getElementById('adminPanel').classList.add('open');
-  await refreshAdminLists();
+// ══════════════════════════════════════
+// ADMIN
+// ══════════════════════════════════════
+function openAdmin() {
+  document.getElementById('adminOverlay').classList.add('open');
+  refreshAdminServices();
+  refreshAdminNotes();
 }
-function closeAdmin() { document.getElementById('adminPanel').classList.remove('open'); loadPublic(); }
-
-async function refreshAdminLists() {
-  try {
-    const [links, notes] = await Promise.all([fetch('/api/links').then(r=>r.json()), fetch('/api/notes').then(r=>r.json())]);
-    renderAdminLinks(links); renderAdminNotes(notes);
-  } catch {}
+function closeAdmin() {
+  document.getElementById('adminOverlay').classList.remove('open');
+  loadData();
 }
 
-function renderAdminLinks(links) {
-  const el = document.getElementById('adminLinks');
-  if (!links.length) { el.innerHTML = '<div class="empty">no services yet</div>'; return; }
-  el.innerHTML = links.map((l,i) => `
-    <div class="item-row">
-      ${faviconImg(l.faviconUrl, l.icon||'🔗', 'item-favicon', 20)}
-      <div class="item-info">
-        <div class="item-name">${esc(l.name)}</div>
-        <div class="item-detail">${esc(l.url)}</div>
+function switchTab(name) {
+  document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.admin-nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('active');
+}
+
+// ── SERVICES ──
+function refreshAdminServices() {
+  const list = document.getElementById('adminLinkList');
+  if (!state.links.length) { list.innerHTML='<div class="empty">no services yet</div>'; return; }
+  list.innerHTML = state.links.map((l,i)=>`
+    <div class="link-row" draggable="true" data-idx="${i}"
+      ondragstart="rowDragStart(event,${i})" ondragover="rowDragOver(event,${i})" ondragleave="rowDragLeave(event)" ondrop="rowDrop(event,${i})" ondragend="rowDragEnd()">
+      <span class="drag-handle">⠿</span>
+      ${l.faviconUrl
+        ? `<img class="row-favicon" src="${esc(faviconSrc(l.faviconUrl))}" alt="" onerror="this.style.display='none'">`
+        : `<span class="row-emoji">${esc(l.icon||'🔗')}</span>`}
+      <div class="row-info">
+        <div class="row-name">${esc(l.name)}</div>
+        <div class="row-url">${esc(l.url)}</div>
       </div>
-      <button class="delete-btn" onclick="deleteLink(${i})">remove</button>
-    </div>`).join('');
-}
-
-function renderAdminNotes(notes) {
-  const el = document.getElementById('adminNotes');
-  if (!notes.length) { el.innerHTML = '<div class="empty">no notes yet</div>'; return; }
-  el.innerHTML = notes.map((n,i) => `
-    <div class="item-row">
-      <div class="item-info">
-        <div class="item-name">${esc(n.content.slice(0,60))}${n.content.length>60?'…':''}</div>
-        <div class="item-detail">${esc(n.date)}</div>
+      ${l.color?`<div class="row-color-dot" style="background:${esc(l.color)}"></div>`:''}
+      <div class="row-actions">
+        <button class="row-btn" onclick="toggleEdit(${i})">edit</button>
+        <button class="row-btn del" onclick="deleteLink(${i})">remove</button>
       </div>
-      <button class="delete-btn" onclick="deleteNote(${i})">remove</button>
-    </div>`).join('');
+    </div>
+    <div class="inline-edit" id="edit-${i}">
+      <div class="form-grid-2" style="margin-bottom:.6rem">
+        <div class="field">
+          <label class="field-label">name</label>
+          <input class="field-input" id="ename-${i}" value="${esc(l.name)}">
+        </div>
+        <div class="field">
+          <label class="field-label">url</label>
+          <input class="field-input" id="eurl-${i}" value="${esc(l.url)}">
+        </div>
+      </div>
+      <div class="form-grid-2" style="margin-bottom:.6rem">
+        <div class="field">
+          <label class="field-label">description</label>
+          <input class="field-input" id="edesc-${i}" value="${esc(l.desc||'')}">
+        </div>
+        <div class="field">
+          <label class="field-label">emoji override</label>
+          <input class="field-input" id="eicon-${i}" value="${esc(l.icon||'')}" maxlength="4">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">accent colour</label>
+        <div class="color-row" id="ecolor-${i}"></div>
+      </div>
+      <div class="form-footer">
+        <button class="btn btn-green" onclick="saveEdit(${i})">save</button>
+        <button class="btn btn-ghost" onclick="toggleEdit(${i})">cancel</button>
+      </div>
+    </div>
+  `).join('');
+
+  // build color pickers for each edit row
+  state.links.forEach((l,i)=>{
+    buildColorPicker(`ecolor-${i}`, c => { window[`editColor_${i}`] = c; });
+    // pre-select current color
+    if (l.color) {
+      const row = document.getElementById(`ecolor-${i}`);
+      row.querySelectorAll('.color-chip').forEach(chip=>{
+        if (chip.style.background && rgbToHex(chip.style.background) === l.color.toLowerCase()) {
+          row.querySelectorAll('.color-chip').forEach(c=>c.classList.remove('selected'));
+          chip.classList.add('selected');
+          window[`editColor_${i}`] = l.color;
+        }
+      });
+    }
+  });
 }
 
-async function saveCredentials() {
-  const username = document.getElementById('newUsername').value.trim();
-  const newPassword = document.getElementById('newPassword').value;
-  const confirmPassword = document.getElementById('confirmPassword').value;
-  if (!username) { toast('username cannot be empty', true); return; }
-  if (newPassword && newPassword !== confirmPassword) { toast('passwords do not match', true); return; }
-  try {
-    await api('POST', '/api/credentials', { username, newPassword, confirmPassword });
-    ['newUsername','newPassword','confirmPassword'].forEach(id => document.getElementById(id).value = '');
-    toast('credentials updated ✓');
-  } catch(e) { toast(e.message, true); }
+function rgbToHex(rgb) {
+  const m = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+  if (!m) return rgb;
+  return '#' + [m[1],m[2],m[3]].map(v=>parseInt(v).toString(16).padStart(2,'0')).join('');
 }
 
-async function addLink() {
-  const name = document.getElementById('linkName').value.trim();
-  let url = document.getElementById('linkUrl').value.trim();
-  const icon = document.getElementById('linkIcon').value.trim();
-  const desc = document.getElementById('linkDesc').value.trim();
-  if (!name || !url) { toast('name and url are required', true); return; }
-  if (!/^https?:\/\//i.test(url)) url = 'http://' + url;
-  const btn = document.getElementById('addLinkBtn');
-  btn.disabled = true;
+function toggleEdit(i) {
+  const el = document.getElementById(`edit-${i}`);
+  el.classList.toggle('show');
+}
+
+async function saveEdit(i) {
+  const name = document.getElementById(`ename-${i}`).value.trim();
+  const url = document.getElementById(`eurl-${i}`).value.trim();
+  const desc = document.getElementById(`edesc-${i}`).value.trim();
+  const icon = document.getElementById(`eicon-${i}`).value.trim();
+  const color = window[`editColor_${i}`] !== undefined ? window[`editColor_${i}`] : state.links[i].color;
+  if (!name||!url) { toast('name and url required','err'); return; }
   try {
-    const data = await api('POST', '/api/links', { name, url, icon, desc, faviconUrl: pendingFaviconUrl });
-    ['linkName','linkUrl','linkIcon','linkDesc'].forEach(id => document.getElementById(id).value = '');
-    pendingFaviconUrl = null;
-    document.getElementById('metaPreview').classList.remove('visible');
-    renderAdminLinks(data.links);
-    toast('service added ✓');
-  } catch(e) { toast(e.message, true); }
-  btn.disabled = false;
+    const d = await apiFetch('PUT',`/api/links/${i}`,{name,url,desc,icon,color});
+    state.links = d.links; refreshAdminServices(); toast('saved ✓');
+  } catch(e) { toast(e.message,'err'); }
 }
 
 async function deleteLink(i) {
-  try { const data = await api('DELETE', `/api/links/${i}`); renderAdminLinks(data.links); toast('service removed'); }
-  catch(e) { toast(e.message, true); }
+  try {
+    const d = await apiFetch('DELETE',`/api/links/${i}`);
+    state.links = d.links; refreshAdminServices(); toast('removed');
+  } catch(e) { toast(e.message,'err'); }
+}
+
+// drag-to-reorder
+function rowDragStart(e,i) { dragSrcIdx=i; e.currentTarget.classList.add('dragging-row'); e.dataTransfer.effectAllowed='move'; }
+function rowDragOver(e,i) { e.preventDefault(); e.dataTransfer.dropEffect='move'; document.querySelectorAll('.link-row').forEach(r=>r.classList.remove('drag-over-row')); e.currentTarget.classList.add('drag-over-row'); }
+function rowDragLeave(e) { e.currentTarget.classList.remove('drag-over-row'); }
+async function rowDrop(e,i) {
+  e.preventDefault();
+  if (dragSrcIdx===null||dragSrcIdx===i) return;
+  const order = state.links.map((_,idx)=>idx);
+  order.splice(i,0,order.splice(dragSrcIdx,1)[0]);
+  try {
+    const d = await apiFetch('POST','/api/links/reorder',{order});
+    state.links=d.links; refreshAdminServices(); toast('reordered ✓');
+  } catch(e){ toast(e.message,'err'); }
+}
+function rowDragEnd() { document.querySelectorAll('.link-row').forEach(r=>{r.classList.remove('dragging-row','drag-over-row');}); dragSrcIdx=null; }
+
+// meta fetch
+async function autoFetchMeta() {
+  let url = document.getElementById('addUrl').value.trim();
+  if (!url) return;
+  if (!/^https?:\/\//i.test(url)) url='http://'+url;
+  pendingFavicon=null;
+  document.getElementById('metaPreview').classList.remove('show');
+  document.getElementById('metaSpinner').classList.add('show');
+  try {
+    const meta = await apiFetch('GET','/api/fetch-meta?url='+encodeURIComponent(url));
+    document.getElementById('metaSpinner').classList.remove('show');
+    if (meta.title||meta.faviconUrl) {
+      if (meta.title&&!document.getElementById('addName').value) document.getElementById('addName').value=meta.title;
+      pendingFavicon=meta.faviconUrl;
+      const preview=document.getElementById('metaPreview');
+      const img=document.getElementById('metaFavicon');
+      if (meta.faviconUrl){ img.src=faviconSrc(meta.faviconUrl); img.style.display=''; } else img.style.display='none';
+      document.getElementById('metaTitle').textContent=meta.title||url;
+      preview.classList.add('show');
+    }
+  } catch { document.getElementById('metaSpinner').classList.remove('show'); }
+}
+
+async function addLink() {
+  const name=document.getElementById('addName').value.trim();
+  let url=document.getElementById('addUrl').value.trim();
+  const icon=document.getElementById('addIcon').value.trim();
+  const desc=document.getElementById('addDesc').value.trim();
+  if (!name||!url){toast('name and url required','err');return;}
+  if (!/^https?:\/\//i.test(url)) url='http://'+url;
+  const btn=document.getElementById('addLinkBtn'); btn.disabled=true;
+  try {
+    const d=await apiFetch('POST','/api/links',{name,url,icon,desc,faviconUrl:pendingFavicon,color:addColor});
+    state.links=d.links;
+    ['addName','addUrl','addIcon','addDesc'].forEach(id=>document.getElementById(id).value='');
+    pendingFavicon=null; addColor=null;
+    document.getElementById('metaPreview').classList.remove('show');
+    document.getElementById('addColorRow').querySelectorAll('.color-chip').forEach((c,i)=>{c.classList.toggle('selected',i===0);});
+    refreshAdminServices(); toast('service added ✓');
+  } catch(e){toast(e.message,'err');}
+  btn.disabled=false;
+}
+
+// ── NOTES ──
+function refreshAdminNotes() {
+  const el=document.getElementById('adminNoteList');
+  if (!state.notes.length){el.innerHTML='<div class="empty">no notes yet</div>';return;}
+  el.innerHTML=state.notes.map((n,i)=>`
+    <div class="link-row" style="cursor:default">
+      <div class="row-info">
+        <div class="row-name">${esc(n.content.slice(0,70))}${n.content.length>70?'…':''}</div>
+        <div class="row-url">${esc(n.date)}</div>
+      </div>
+      <div class="row-actions">
+        <button class="row-btn del" onclick="deleteNote(${i})">remove</button>
+      </div>
+    </div>`).join('');
 }
 
 async function addNote() {
-  const content = document.getElementById('noteContent').value.trim();
-  if (!content) { toast('write something first', true); return; }
-  const btn = document.getElementById('addNoteBtn');
-  btn.disabled = true;
+  const content=document.getElementById('addNoteContent').value.trim();
+  if (!content){toast('write something first','err');return;}
+  const btn=document.getElementById('addNoteBtn'); btn.disabled=true;
   try {
-    const data = await api('POST', '/api/notes', { content });
-    document.getElementById('noteContent').value = '';
-    renderAdminNotes(data.notes);
-    toast('note added ✓');
-  } catch(e) { toast(e.message, true); }
-  btn.disabled = false;
+    const d=await apiFetch('POST','/api/notes',{content});
+    state.notes=d.notes; document.getElementById('addNoteContent').value='';
+    refreshAdminNotes(); toast('note added ✓');
+  } catch(e){toast(e.message,'err');}
+  btn.disabled=false;
 }
 
 async function deleteNote(i) {
-  try { const data = await api('DELETE', `/api/notes/${i}`); renderAdminNotes(data.notes); toast('note removed'); }
-  catch(e) { toast(e.message, true); }
+  try { const d=await apiFetch('DELETE',`/api/notes/${i}`); state.notes=d.notes; refreshAdminNotes(); toast('note removed'); }
+  catch(e){toast(e.message,'err');}
 }
 
-document.getElementById('loginModal').addEventListener('click', function(e) { if (e.target===this) closeLogin(); });
+// ── LAYOUT ──
+function previewCols(v) {
+  document.getElementById('colsVal').textContent=v;
+  document.documentElement.style.setProperty('--cols',v);
+}
+async function saveCols(v) {
+  try { const d=await apiFetch('POST','/api/settings',{columns:parseInt(v)}); state.settings=d.settings; toast('layout saved ✓'); }
+  catch(e){toast(e.message,'err');}
+}
+async function saveCompact(v) {
+  document.body.classList.toggle('compact',v);
+  try { const d=await apiFetch('POST','/api/settings',{compactMode:v}); state.settings=d.settings; toast('layout saved ✓'); }
+  catch(e){toast(e.message,'err');}
+}
 
-loadPublic();
+// ── SECURITY ──
+async function saveCredentials() {
+  const username=document.getElementById('secUser').value.trim();
+  const newPassword=document.getElementById('secPass').value;
+  const confirmPassword=document.getElementById('secPassConfirm').value;
+  if (!username){toast('username required','err');return;}
+  if (newPassword&&newPassword!==confirmPassword){toast('passwords do not match','err');return;}
+  try {
+    await apiFetch('POST','/api/credentials',{username,newPassword,confirmPassword});
+    ['secPass','secPassConfirm'].forEach(id=>document.getElementById(id).value='');
+    toast('credentials updated ✓');
+  } catch(e){toast(e.message,'err');}
+}
+
+init();
 </script>
 </body>
 </html>
