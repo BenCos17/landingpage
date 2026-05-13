@@ -74,3 +74,4 @@ ports:
 - Credentials are stored in plaintext in `jarvis.json`. This is fine for a private LAN but don't expose this to the public internet without adding HTTPS (e.g. via a Caddy or Nginx reverse proxy).
 - Sessions expire after 8 hours.
 - Change `SESSION_SECRET` before deploying.
+- 
