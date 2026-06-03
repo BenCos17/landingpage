@@ -1218,9 +1218,13 @@
               <div class="field"><label class="fl">name</label><input class="fi" id="addName" type="text"
                   placeholder="Jellyfin"></div>
               <div class="field"><label class="fl">category</label>
-                <select class="fi" id="addCategory">
-                  <option value="">— none —</option>
-                </select>
+                <div style="display:flex;gap:.4rem;align-items:flex-end;">
+                  <select class="fi" id="addCategory" style="flex:1;">
+                    <option value="">— none —</option>
+                  </select>
+                  <button class="btn btn-ghost btn-sm" onclick="openQuickAddCategory()" title="Create new category"
+                    style="flex-shrink:0;">+ new</button>
+                </div>
               </div>
             </div>
             <div class="field"><label class="fl">description</label><input class="fi" id="addDesc" type="text"
@@ -1424,7 +1428,7 @@
       { label: 'purple', val: '#a78bfa' }, { label: 'orange', val: '#fb923c' }, { label: 'red', val: '#f87171' },
       { label: 'yellow', val: '#facc15' }, { label: 'pink', val: '#f472b6' },
     ];
-    const VERSION = '1.0.0';
+    const VERSION = '1.0.1';
     const AP_DEF = {
       name: 'jarvis', tag: '', subtitle: 'your local services, in one place.', footer: '',
       accent: '#4ade80', bg: '#0c0e13', surface: '#12151c', text: '#e4e8f0',
@@ -1888,6 +1892,36 @@
         state.categories = d.categories;
         document.getElementById('catName').value = ''; document.getElementById('catIcon').value = '';
         refreshAdminCategories(); populateCategoryDropdown('addCategory'); toast('category added ✓');
+      } catch (e) { toast(e.message, 'err'); }
+    }
+
+    function openQuickAddCategory() {
+      document.getElementById('editModalBody').innerHTML = `
+        <div class="modal-title">// new category</div>
+        <div class="g2">
+          <div class="field"><label class="fl">name</label><input class="fi" id="qc-name" type="text" placeholder="Media" autofocus></div>
+          <div class="field"><label class="fl">icon (emoji)</label><input class="fi" id="qc-icon" type="text" placeholder="📺" maxlength="4"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-green" onclick="saveQuickCategory()">add category</button>
+          <button class="btn btn-ghost" onclick="closeModal()">cancel</button>
+        </div>`;
+      openModal();
+    }
+
+    async function saveQuickCategory() {
+      const name = document.getElementById('qc-name').value.trim();
+      const icon = document.getElementById('qc-icon').value.trim() || '📁';
+      if (!name) { toast('name required', 'err'); return; }
+      try {
+        const d = await api('POST', '/api/categories', { name, icon });
+        state.categories = d.categories;
+        populateCategoryDropdown('addCategory');
+        if (d.categories.length > 0) {
+          document.getElementById('addCategory').value = d.categories[d.categories.length - 1].id;
+        }
+        closeModal();
+        toast('category added ✓');
       } catch (e) { toast(e.message, 'err'); }
     }
 
