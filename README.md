@@ -39,6 +39,29 @@ Tabs available:
 - Layout: change grid columns and compact mode.
 - Appearance: change name, subtitle, footer, fonts, and colours.
 - Security: update login credentials and manage backups.
+  backup ui
+<img width="1058" height="719" alt="image" src="https://github.com/user-attachments/assets/9f395ced-7ab3-42ef-8e7d-58b51d68473d" />
+landing page ui
+<img width="2559" height="1324" alt="image" src="https://github.com/user-attachments/assets/19c91933-7787-46aa-aa2f-ffb64287c50e" />
+admin ui
+<img width="1065" height="472" alt="image" src="https://github.com/user-attachments/assets/6646a807-caf5-40f1-82be-e1a01bc62ce3" />
+categories
+<img width="1056" height="552" alt="image" src="https://github.com/user-attachments/assets/0c9d3fea-4083-428c-ab63-8750fa14a5e3" />
+notes
+<img width="1054" height="362" alt="image" src="https://github.com/user-attachments/assets/5589d97c-0727-42e8-a294-f8db9cf21fa1" />
+layout settings
+<img width="1054" height="301" alt="image" src="https://github.com/user-attachments/assets/3fa4f2f3-9768-45a0-a5ae-a062e9639b1d" />
+appearance
+<img width="1083" height="888" alt="image" src="https://github.com/user-attachments/assets/56ff268d-28c2-4ac2-adee-8b172ea90ef5" />
+security ui
+<img width="1059" height="526" alt="image" src="https://github.com/user-attachments/assets/c6fb4f4b-b672-4a73-ae69-3fa0792915ef" />
+
+
+
+
+
+
+
 
 ## Backups
 
@@ -116,3 +139,7 @@ Then the app will be available on port `8080` on the host.
 ## Versioning
 
 The displayed UI version, `package.json`, Docker image tag, and Compose file should stay aligned. When you bump the app version, update all of them together so you always know what is running.
+
+
+
+
