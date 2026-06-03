@@ -29,6 +29,34 @@ function writeData(d) {
   fs.writeFileSync(DATA_FILE, JSON.stringify(d, null, 2));
 }
 
+function sameJson(a, b) {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+function sectionSummary(label, beforeValue, afterValue) {
+  const beforeCount = Array.isArray(beforeValue) ? beforeValue.length : null;
+  const afterCount = Array.isArray(afterValue) ? afterValue.length : null;
+  if (beforeCount !== null && afterCount !== null) {
+    if (beforeCount !== afterCount) return `${label}: ${beforeCount} → ${afterCount}`;
+    if (!sameJson(beforeValue, afterValue)) return `${label}: updated`;
+    return `${label}: unchanged`;
+  }
+  return sameJson(beforeValue, afterValue) ? `${label}: unchanged` : `${label}: updated`;
+}
+
+function summarizeImport(current, next) {
+  const lines = [
+    sectionSummary('links', current.links || [], next.links || []),
+    sectionSummary('notes', current.notes || [], next.notes || []),
+    sectionSummary('categories', current.categories || [], next.categories || []),
+    sectionSummary('settings', current.settings || {}, next.settings || {}),
+    sectionSummary('appearance', current.appearance || {}, next.appearance || {}),
+    current.username !== next.username ? `username: ${current.username} → ${next.username}` : 'username: unchanged',
+    current.password !== next.password ? 'password: updated' : 'password: unchanged',
+  ];
+  return lines;
+}
+
 if (!fs.existsSync(DATA_FILE)) writeData(readData());
 
 function fetchUrl(url, depth = 0) {
@@ -143,7 +171,7 @@ app.post('/api/import', requireAuth, (req, res) => {
   };
 
   writeData(next);
-  res.json({ ok: true, data: next });
+  res.json({ ok: true, data: next, summary: summarizeImport(current, next) });
 });
 
 // ── CATEGORIES ──

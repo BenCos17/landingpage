@@ -1419,6 +1419,9 @@
               </div>
               <div class="setting-desc" style="margin-top:.65rem;">Exports the full dashboard JSON and restores it from
                 a saved backup file.</div>
+              <div id="importSummary"
+                style="margin-top:.8rem;display:none;padding:.75rem .9rem;border:1px solid var(--border);border-radius:var(--r);background:var(--surface2);font-family:var(--mono);font-size:.68rem;line-height:1.5;color:var(--text-muted);">
+              </div>
             </div>
           </div>
         </div>
@@ -1443,7 +1446,7 @@
       { label: 'purple', val: '#a78bfa' }, { label: 'orange', val: '#fb923c' }, { label: 'red', val: '#f87171' },
       { label: 'yellow', val: '#facc15' }, { label: 'pink', val: '#f472b6' },
     ];
-    const VERSION = '1.0.3';
+    const VERSION = '1.0.4';
     const AP_DEF = {
       name: 'jarvis', tag: '', subtitle: 'your local services, in one place.', footer: '',
       accent: '#4ade80', bg: '#0c0e13', surface: '#12151c', text: '#e4e8f0',
@@ -2137,17 +2140,30 @@
       try {
         const text = await file.text();
         const parsed = JSON.parse(text);
-        await api('POST', '/api/import', { data: parsed });
+        const result = await api('POST', '/api/import', { data: parsed });
         await loadData();
         if (document.getElementById('adminOverlay').classList.contains('open')) {
           refreshAdminServices();
           refreshAdminCategories();
           refreshAdminNotes();
         }
+        renderImportSummary(result.summary || []);
         toast('backup imported ✓');
       } catch (e) {
         toast(e.message || 'invalid backup file', 'err');
       }
+    }
+
+    function renderImportSummary(lines) {
+      const box = document.getElementById('importSummary');
+      if (!box) return;
+      if (!Array.isArray(lines) || !lines.length) {
+        box.style.display = 'none';
+        box.innerHTML = '';
+        return;
+      }
+      box.style.display = 'block';
+      box.innerHTML = `<div style="margin-bottom:.35rem;color:var(--accent);">import summary</div>${lines.map(line => `<div>• ${esc(line)}</div>`).join('')}`;
     }
 
     init();
