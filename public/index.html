@@ -989,6 +989,7 @@
     }
 
     input[type=range] {
+      appearance: none;
       -webkit-appearance: none;
       width: 110px;
       height: 3px;
@@ -1406,6 +1407,20 @@
             <div class="form-footer"><button class="btn btn-green" onclick="saveCredentials()">update
                 credentials</button></div>
           </div>
+          <div class="settings-group">
+            <div class="sg-title">backup</div>
+            <div class="card-form">
+              <div class="form-footer" style="justify-content:flex-start;flex-wrap:wrap;gap:.5rem;">
+                <button class="btn btn-green" onclick="exportBackup()">download backup</button>
+                <button class="btn btn-ghost" onclick="document.getElementById('importBackupInput').click()">import
+                  backup</button>
+                <input type="file" id="importBackupInput" accept="application/json" style="display:none"
+                  onchange="importBackupFile(event)">
+              </div>
+              <div class="setting-desc" style="margin-top:.65rem;">Exports the full dashboard JSON and restores it from
+                a saved backup file.</div>
+            </div>
+          </div>
         </div>
 
       </div>
@@ -1428,7 +1443,7 @@
       { label: 'purple', val: '#a78bfa' }, { label: 'orange', val: '#fb923c' }, { label: 'red', val: '#f87171' },
       { label: 'yellow', val: '#facc15' }, { label: 'pink', val: '#f472b6' },
     ];
-    const VERSION = '1.0.2';
+    const VERSION = '1.0.3';
     const AP_DEF = {
       name: 'jarvis', tag: '', subtitle: 'your local services, in one place.', footer: '',
       accent: '#4ade80', bg: '#0c0e13', surface: '#12151c', text: '#e4e8f0',
@@ -1493,6 +1508,19 @@
       return data;
     }
 
+    async function apiBlob(path) {
+      const res = await fetch(path, { credentials: 'same-origin' });
+      if (!res.ok) {
+        let message = 'error';
+        try {
+          const data = await res.json();
+          message = data.error || message;
+        } catch { }
+        throw new Error(message);
+      }
+      return res.blob();
+    }
+
     function faviconSrc(url) { return '/api/proxy-favicon?url=' + encodeURIComponent(url); }
 
     function faviconImg(link, size) {
@@ -1518,6 +1546,18 @@
 
     function getCategoryName(id) {
       const c = state.categories.find(c => c.id === id); return c ? c.name : '';
+    }
+
+    function downloadText(filename, text) {
+      const blob = new Blob([text], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
     }
 
     // ════════════════════════════════════════
@@ -2071,6 +2111,43 @@
       if (newPassword && newPassword !== confirmPassword) { toast('passwords do not match', 'err'); return; }
       try { await api('POST', '/api/credentials', { username, newPassword, confirmPassword });['secPass', 'secPassConfirm'].forEach(id => document.getElementById(id).value = ''); toast('credentials updated ✓'); }
       catch (e) { toast(e.message, 'err'); }
+    }
+
+    async function exportBackup() {
+      try {
+        const blob = await apiBlob('/api/export');
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `jarvis-backup-${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        toast('backup downloaded ✓');
+      } catch (e) {
+        toast(e.message, 'err');
+      }
+    }
+
+    async function importBackupFile(event) {
+      const file = event.target.files && event.target.files[0];
+      event.target.value = '';
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const parsed = JSON.parse(text);
+        await api('POST', '/api/import', { data: parsed });
+        await loadData();
+        if (document.getElementById('adminOverlay').classList.contains('open')) {
+          refreshAdminServices();
+          refreshAdminCategories();
+          refreshAdminNotes();
+        }
+        toast('backup imported ✓');
+      } catch (e) {
+        toast(e.message || 'invalid backup file', 'err');
+      }
     }
 
     init();

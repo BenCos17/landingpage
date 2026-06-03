@@ -12,7 +12,7 @@ const DATA_FILE = process.env.DATA_FILE || '/data/jarvis.json';
 function readData() {
   try {
     if (fs.existsSync(DATA_FILE)) return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
-  } catch {}
+  } catch { }
   return {
     username: process.env.DEFAULT_USERNAME || 'admin',
     password: process.env.DEFAULT_PASSWORD || 'admin',
@@ -36,11 +36,11 @@ function fetchUrl(url, depth = 0) {
   return new Promise((resolve, reject) => {
     const lib = url.startsWith('https') ? https : http;
     const req = lib.get(url, { timeout: 6000, headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Jarvis/1.0)' } }, res => {
-      if ([301,302,303,307,308].includes(res.statusCode) && res.headers.location) {
-        return fetchUrl(new URL(res.headers.location, url).href, depth+1).then(resolve).catch(reject);
+      if ([301, 302, 303, 307, 308].includes(res.statusCode) && res.headers.location) {
+        return fetchUrl(new URL(res.headers.location, url).href, depth + 1).then(resolve).catch(reject);
       }
       const chunks = [];
-      res.on('data', c => { chunks.push(c); if (Buffer.concat(chunks).length > 150*1024) req.destroy(); });
+      res.on('data', c => { chunks.push(c); if (Buffer.concat(chunks).length > 150 * 1024) req.destroy(); });
       res.on('end', () => resolve({ status: res.statusCode, body: Buffer.concat(chunks), headers: res.headers }));
       res.on('error', reject);
     });
@@ -53,7 +53,7 @@ function extractMeta(html, baseUrl) {
   const base = new URL(baseUrl);
   const ogTitle = html.match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["']/i) || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:title["']/i);
   const titleTag = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-  const title = (ogTitle?.[1] || titleTag?.[1] || '').trim().replace(/&amp;/g,'&').replace(/&#39;/g,"'").slice(0,60);
+  const title = (ogTitle?.[1] || titleTag?.[1] || '').trim().replace(/&amp;/g, '&').replace(/&#39;/g, "'").slice(0, 60);
   const candidates = [];
   const apple = html.match(/<link[^>]+rel=["'][^"']*apple-touch-icon[^"']*["'][^>]+href=["']([^"']+)["']/i) || html.match(/<link[^>]+href=["']([^"']+)["'][^>]+rel=["'][^"']*apple-touch-icon[^"']*["']/i);
   if (apple) candidates.push(apple[1]);
@@ -61,18 +61,18 @@ function extractMeta(html, baseUrl) {
   let m; while ((m = iconRe.exec(html)) !== null) candidates.push(m[1]);
   candidates.push('/favicon.ico');
   const seen = new Set(); const favicons = [];
-  for (const c of candidates) { try { const abs = new URL(c, base).href; if (!seen.has(abs)) { seen.add(abs); favicons.push(abs); } } catch {} }
+  for (const c of candidates) { try { const abs = new URL(c, base).href; if (!seen.has(abs)) { seen.add(abs); favicons.push(abs); } } catch { } }
   return { title, favicons };
 }
 
 async function checkFavicon(url) {
-  try { const r = await fetchUrl(url); if (r.status >= 200 && r.status < 400 && r.body.length > 0) return url; } catch {}
+  try { const r = await fetchUrl(url); if (r.status >= 200 && r.status < 400 && r.body.length > 0) return url; } catch { }
   return null;
 }
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(session({ secret: process.env.SESSION_SECRET || 'jarvis-secret-change-me', resave: false, saveUninitialized: false, cookie: { maxAge: 1000*60*60*8 } }));
+app.use(session({ secret: process.env.SESSION_SECRET || 'jarvis-secret-change-me', resave: false, saveUninitialized: false, cookie: { maxAge: 1000 * 60 * 60 * 8 } }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 function requireAuth(req, res, next) {
@@ -120,6 +120,32 @@ app.get('/api/data', (req, res) => {
   res.json({ links: d.links, notes: d.notes, categories: d.categories || [], settings: d.settings || {}, appearance: d.appearance || {} });
 });
 
+app.get('/api/export', requireAuth, (req, res) => {
+  const d = readData();
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Content-Disposition', 'attachment; filename="jarvis-backup.json"');
+  res.send(JSON.stringify(d, null, 2));
+});
+
+app.post('/api/import', requireAuth, (req, res) => {
+  const payload = req.body?.data && typeof req.body.data === 'object' ? req.body.data : req.body;
+  if (!payload || typeof payload !== 'object') return res.status(400).json({ error: 'backup data required' });
+
+  const current = readData();
+  const next = {
+    username: typeof payload.username === 'string' && payload.username.trim() ? payload.username : current.username,
+    password: typeof payload.password === 'string' && payload.password ? payload.password : current.password,
+    links: Array.isArray(payload.links) ? payload.links : [],
+    notes: Array.isArray(payload.notes) ? payload.notes : [],
+    categories: Array.isArray(payload.categories) ? payload.categories : [],
+    settings: payload.settings && typeof payload.settings === 'object' ? payload.settings : {},
+    appearance: payload.appearance && typeof payload.appearance === 'object' ? payload.appearance : {},
+  };
+
+  writeData(next);
+  res.json({ ok: true, data: next });
+});
+
 // ── CATEGORIES ──
 app.get('/api/categories', (req, res) => res.json(readData().categories || []));
 
@@ -165,7 +191,7 @@ app.post('/api/links', requireAuth, (req, res) => {
   const { name, url, icon, desc, faviconUrl, color, category } = req.body;
   if (!name || !url) return res.status(400).json({ error: 'name and url required' });
   const d = readData();
-  d.links.push({ name, url: /^https?:\/\//i.test(url) ? url : 'http://'+url, icon: icon||'', desc: desc||'', faviconUrl: faviconUrl||null, color: color||null, category: category||null });
+  d.links.push({ name, url: /^https?:\/\//i.test(url) ? url : 'http://' + url, icon: icon || '', desc: desc || '', faviconUrl: faviconUrl || null, color: color || null, category: category || null });
   writeData(d); res.json({ ok: true, links: d.links });
 });
 

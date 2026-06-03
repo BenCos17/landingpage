@@ -1,6 +1,6 @@
 services:
   jarvis:
-    image: ghcr.io/bencos17/landingpage:1.0.2
+    image: ghcr.io/bencos17/landingpage:1.0.3
     container_name: jarvis
     restart: unless-stopped
     ports:
