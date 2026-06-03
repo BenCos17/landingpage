@@ -13,3 +13,4 @@ services:
       - DEFAULT_USERNAME=admin
       - DEFAULT_PASSWORD=admin
       - SESSION_SECRET=b4a6fe0ae1c6dc3fdb863865475b321a758d66fa86fac1710cc53869974d45d5
+    
