@@ -1,750 +1,1720 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>jarvis</title>
-<link rel="icon" type="image/gif" href="/favicon.gif">
-<link href="https://fonts.googleapis.com/css2?family=Berkeley+Mono:ital,wght@0,400;0,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg:#0c0e13;--surface:#12151c;--surface2:#181c26;--surface3:#1e2330;
-  --border:#232838;--border2:#2c3347;--border3:#38405a;
-  --accent:#4ade80;--accent-dim:#172d1e;
-  --text:#e4e8f0;--text-muted:#6b7594;--text-dim:#353d57;
-  --red:#f87171;--red-dim:#2a1212;
-  --mono:'Berkeley Mono','Fira Mono',monospace;
-  --sans:'DM Sans',system-ui,sans-serif;
-  --r:8px;--r2:12px;--cols:4;
-}
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
-html{height:100%;}
-body{background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:300;min-height:100vh;}
-::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>jarvis</title>
+  <link rel="icon" type="image/gif" href="/favicon.gif">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Berkeley+Mono:ital,wght@0,400;0,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0c0e13;
+      --surface: #12151c;
+      --surface2: #181c26;
+      --surface3: #1e2330;
+      --border: #232838;
+      --border2: #2c3347;
+      --border3: #38405a;
+      --accent: #4ade80;
+      --accent-dim: #172d1e;
+      --text: #e4e8f0;
+      --text-muted: #6b7594;
+      --text-dim: #353d57;
+      --red: #f87171;
+      --red-dim: #2a1212;
+      --mono: 'Berkeley Mono', 'Fira Mono', monospace;
+      --sans: 'DM Sans', system-ui, sans-serif;
+      --r: 8px;
+      --r2: 12px;
+      --cols: 4;
+    }
 
-/* ── HEADER ── */
-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 2rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(12,14,19,.92);z-index:50;backdrop-filter:blur(12px);}
-.logo{font-family:var(--mono);font-size:.95rem;color:var(--text);letter-spacing:-.02em;}
-.logo em{color:var(--accent);font-style:normal;}
-.header-right{display:flex;align-items:center;gap:1rem;}
-.hdr-clock{font-family:var(--mono);font-size:.7rem;color:var(--text-muted);}
-.dot{width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;margin-right:.4rem;animation:pulse 2s ease-in-out infinite;}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-.btn-admin{font-family:var(--mono);font-size:.7rem;padding:.35rem .8rem;background:transparent;border:1px solid var(--border2);border-radius:var(--r);color:var(--text-muted);cursor:pointer;transition:all .18s;}
-.btn-admin:hover{border-color:var(--accent);color:var(--accent);}
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-/* ── MAIN ── */
-main{max-width:1200px;margin:0 auto;padding:2.5rem 2rem 4rem;}
-.hero{margin-bottom:2rem;}
-.hero-tag{font-family:var(--mono);font-size:.7rem;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem;}
-.hero h1{font-size:2.4rem;font-weight:300;letter-spacing:-.04em;line-height:1.1;margin-bottom:.3rem;}
-.hero p{color:var(--text-muted);font-size:.88rem;}
+    html {
+      height: 100%;
+    }
 
-/* ── SEARCH ── */
-.search-wrap{margin-bottom:2rem;position:relative;}
-.search-input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:.6rem 1rem .6rem 2.5rem;color:var(--text);font-family:var(--mono);font-size:.8rem;outline:none;transition:border-color .2s;}
-.search-input:focus{border-color:var(--border2);}
-.search-icon{position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:var(--text-dim);pointer-events:none;}
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-weight: 300;
+      min-height: 100vh;
+    }
 
-/* ── CATEGORY SECTION ── */
-.cat-section{margin-bottom:2rem;}
-.cat-header{display:flex;align-items:center;gap:.6rem;margin-bottom:.85rem;cursor:pointer;user-select:none;padding:.2rem 0;}
-.cat-header:hover .cat-name{color:var(--text);}
-.cat-toggle{font-family:var(--mono);font-size:.65rem;color:var(--text-dim);transition:transform .2s;flex-shrink:0;}
-.cat-toggle.open{transform:rotate(90deg);}
-.cat-icon{font-size:1rem;line-height:1;flex-shrink:0;}
-.cat-name{font-family:var(--mono);font-size:.68rem;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;flex:1;}
-.cat-count{font-family:var(--mono);font-size:.6rem;color:var(--text-dim);}
-.cat-line{flex:1;height:1px;background:var(--border);margin-left:.4rem;}
-.cat-body{overflow:hidden;transition:max-height .25s ease;}
-.cat-body.collapsed{max-height:0!important;}
+    ::-webkit-scrollbar {
+      width: 5px;
+    }
 
-/* ── LINKS GRID ── */
-.links-grid{display:grid;grid-template-columns:repeat(var(--cols),1fr);gap:.6rem;}
-@media(max-width:900px){.links-grid{grid-template-columns:repeat(3,1fr);}}
-@media(max-width:600px){.links-grid{grid-template-columns:repeat(2,1fr);}}
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
 
-.link-card{display:block;background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:1rem 1.1rem;text-decoration:none;transition:all .18s;position:relative;overflow:hidden;}
-.link-card .cab{position:absolute;top:0;left:0;right:0;height:2px;opacity:0;transition:opacity .18s;}
-.link-card:hover{border-color:var(--border2);background:var(--surface2);transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,0,0,.3);}
-.link-card:hover .cab{opacity:1;}
-.card-top{margin-bottom:.55rem;}
-.card-icon-wrap{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:7px;background:var(--surface2);border:1px solid var(--border);overflow:hidden;}
-.card-favicon{width:20px;height:20px;object-fit:contain;}
-.card-name{font-weight:500;font-size:.84rem;color:var(--text);margin-bottom:.12rem;line-height:1.3;}
-.card-desc{font-size:.71rem;color:var(--text-muted);line-height:1.4;margin-bottom:.4rem;}
-.card-url{font-family:var(--mono);font-size:.59rem;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    ::-webkit-scrollbar-thumb {
+      background: var(--border2);
+      border-radius: 3px;
+    }
 
-/* compact */
-body.compact .link-card{padding:.6rem .8rem;}
-body.compact .card-icon-wrap{width:24px;height:24px;border-radius:5px;}
-body.compact .card-favicon{width:15px;height:15px;}
-body.compact .card-desc,body.compact .card-url{display:none;}
-body.compact .card-top{margin-bottom:.25rem;}
+    /* ── HEADER ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: rgba(12, 14, 19, .92);
+      z-index: 50;
+      backdrop-filter: blur(12px);
+    }
 
-/* ── NOTES ── */
-.notes-section{margin-top:1rem;}
-.notes-list{display:flex;flex-direction:column;gap:.5rem;}
-.note-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.85rem 1.1rem;}
-.note-meta{font-family:var(--mono);font-size:.6rem;color:var(--text-dim);margin-bottom:.3rem;}
-.note-text{font-size:.85rem;color:var(--text);line-height:1.55;}
+    .logo {
+      font-family: var(--mono);
+      font-size: .95rem;
+      color: var(--text);
+      letter-spacing: -.02em;
+    }
 
-.empty{font-family:var(--mono);font-size:.75rem;color:var(--text-dim);padding:1.75rem;border:1px dashed var(--border);border-radius:var(--r2);text-align:center;grid-column:1/-1;}
-footer{text-align:center;padding:1.5rem;font-family:var(--mono);font-size:.6rem;color:var(--text-dim);border-top:1px solid var(--border);}
+    .logo em {
+      color: var(--accent);
+      font-style: normal;
+    }
 
-/* ════════════════════════════
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .hdr-clock {
+      font-family: var(--mono);
+      font-size: .7rem;
+      color: var(--text-muted);
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: inline-block;
+      margin-right: .4rem;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .35
+      }
+    }
+
+    .btn-admin {
+      font-family: var(--mono);
+      font-size: .7rem;
+      padding: .35rem .8rem;
+      background: transparent;
+      border: 1px solid var(--border2);
+      border-radius: var(--r);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all .18s;
+    }
+
+    .btn-admin:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ── MAIN ── */
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem 4rem;
+    }
+
+    .hero {
+      margin-bottom: 2rem;
+    }
+
+    .hero-tag {
+      font-family: var(--mono);
+      font-size: .7rem;
+      color: var(--accent);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      margin-bottom: .3rem;
+    }
+
+    .hero h1 {
+      font-size: 2.4rem;
+      font-weight: 300;
+      letter-spacing: -.04em;
+      line-height: 1.1;
+      margin-bottom: .3rem;
+    }
+
+    .hero p {
+      color: var(--text-muted);
+      font-size: .88rem;
+    }
+
+    /* ── SEARCH ── */
+    .search-wrap {
+      margin-bottom: 2rem;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r2);
+      padding: .6rem 1rem .6rem 2.5rem;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: .8rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--border2);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: .85rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-dim);
+      pointer-events: none;
+    }
+
+    /* ── CATEGORY SECTION ── */
+    .cat-section {
+      margin-bottom: 2rem;
+    }
+
+    .cat-header {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      margin-bottom: .85rem;
+      cursor: pointer;
+      user-select: none;
+      padding: .2rem 0;
+    }
+
+    .cat-header:hover .cat-name {
+      color: var(--text);
+    }
+
+    .cat-toggle {
+      font-family: var(--mono);
+      font-size: .65rem;
+      color: var(--text-dim);
+      transition: transform .2s;
+      flex-shrink: 0;
+    }
+
+    .cat-toggle.open {
+      transform: rotate(90deg);
+    }
+
+    .cat-icon {
+      font-size: 1rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .cat-name {
+      font-family: var(--mono);
+      font-size: .68rem;
+      color: var(--text-muted);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      flex: 1;
+    }
+
+    .cat-count {
+      font-family: var(--mono);
+      font-size: .6rem;
+      color: var(--text-dim);
+    }
+
+    .cat-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+      margin-left: .4rem;
+    }
+
+    .cat-body {
+      overflow: hidden;
+      transition: max-height .25s ease;
+    }
+
+    .cat-body.collapsed {
+      max-height: 0 !important;
+    }
+
+    /* ── LINKS GRID ── */
+    .links-grid {
+      display: grid;
+      grid-template-columns: repeat(var(--cols), 1fr);
+      gap: .6rem;
+    }
+
+    @media(max-width:900px) {
+      .links-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media(max-width:600px) {
+      .links-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .link-card {
+      display: block;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r2);
+      padding: 1rem 1.1rem;
+      text-decoration: none;
+      transition: all .18s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .link-card .cab {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      opacity: 0;
+      transition: opacity .18s;
+    }
+
+    .link-card:hover {
+      border-color: var(--border2);
+      background: var(--surface2);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, .3);
+    }
+
+    .link-card:hover .cab {
+      opacity: 1;
+    }
+
+    .card-top {
+      margin-bottom: .55rem;
+    }
+
+    .card-icon-wrap {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 7px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .card-favicon {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+    }
+
+    .card-name {
+      font-weight: 500;
+      font-size: .84rem;
+      color: var(--text);
+      margin-bottom: .12rem;
+      line-height: 1.3;
+    }
+
+    .card-desc {
+      font-size: .71rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      margin-bottom: .4rem;
+    }
+
+    .card-url {
+      font-family: var(--mono);
+      font-size: .59rem;
+      color: var(--text-dim);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* compact */
+    body.compact .link-card {
+      padding: .6rem .8rem;
+    }
+
+    body.compact .card-icon-wrap {
+      width: 24px;
+      height: 24px;
+      border-radius: 5px;
+    }
+
+    body.compact .card-favicon {
+      width: 15px;
+      height: 15px;
+    }
+
+    body.compact .card-desc,
+    body.compact .card-url {
+      display: none;
+    }
+
+    body.compact .card-top {
+      margin-bottom: .25rem;
+    }
+
+    /* ── NOTES ── */
+    .notes-section {
+      margin-top: 1rem;
+    }
+
+    .notes-list {
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+    }
+
+    .note-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: .85rem 1.1rem;
+    }
+
+    .note-meta {
+      font-family: var(--mono);
+      font-size: .6rem;
+      color: var(--text-dim);
+      margin-bottom: .3rem;
+    }
+
+    .note-text {
+      font-size: .85rem;
+      color: var(--text);
+      line-height: 1.55;
+    }
+
+    .empty {
+      font-family: var(--mono);
+      font-size: .75rem;
+      color: var(--text-dim);
+      padding: 1.75rem;
+      border: 1px dashed var(--border);
+      border-radius: var(--r2);
+      text-align: center;
+      grid-column: 1/-1;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-family: var(--mono);
+      font-size: .6rem;
+      color: var(--text-dim);
+      border-top: 1px solid var(--border);
+    }
+
+    /* ════════════════════════════
    ADMIN OVERLAY
 ════════════════════════════ */
-.admin-overlay{display:none;position:fixed;inset:0;z-index:300;}
-.admin-overlay.open{display:flex;}
-.admin-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);}
-.admin-shell{position:relative;display:flex;width:100%;height:100%;max-width:1060px;margin:0 auto;animation:slideIn .22s ease;}
-@keyframes slideIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+    .admin-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+    }
 
-.admin-sidebar{width:190px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:1.25rem 0;}
-.admin-logo{font-family:var(--mono);font-size:.75rem;color:var(--accent);padding:0 1.25rem 1.25rem;border-bottom:1px solid var(--border);margin-bottom:.75rem;letter-spacing:.05em;}
-.nav-item{display:flex;align-items:center;gap:.6rem;padding:.5rem 1.25rem;font-family:var(--mono);font-size:.7rem;color:var(--text-muted);cursor:pointer;transition:all .15s;border-left:2px solid transparent;}
-.nav-item:hover{color:var(--text);background:var(--surface2);}
-.nav-item.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-dim);}
-.nav-icon{width:14px;text-align:center;opacity:.7;}
-.admin-spacer{flex:1;}
-.admin-close-btn{display:flex;align-items:center;gap:.5rem;padding:.55rem 1.25rem;font-family:var(--mono);font-size:.7rem;color:var(--text-dim);cursor:pointer;transition:all .15s;}
-.admin-close-btn:hover{color:var(--red);}
+    .admin-overlay.open {
+      display: flex;
+    }
 
-.admin-main{flex:1;background:var(--bg);overflow-y:auto;}
-.admin-tab{display:none;padding:1.75rem 2rem;}
-.admin-tab.active{display:block;}
-.tab-title{font-family:var(--mono);font-size:.68rem;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:1.5rem;padding-bottom:.7rem;border-bottom:1px solid var(--border);}
+    .admin-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, .6);
+      backdrop-filter: blur(6px);
+    }
 
-/* ── FORM BITS ── */
-.card-form{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:1.2rem;margin-bottom:1rem;}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.7rem;}
-.field{display:flex;flex-direction:column;gap:.28rem;margin-bottom:.6rem;}
-.field:last-child{margin-bottom:0;}
-.fl{font-family:var(--mono);font-size:.6rem;color:var(--text-muted);letter-spacing:.07em;text-transform:uppercase;}
-.fi{background:var(--bg);border:1px solid var(--border2);border-radius:var(--r);padding:.45rem .7rem;color:var(--text);font-family:var(--mono);font-size:.76rem;outline:none;transition:border-color .18s;width:100%;}
-.fi:focus{border-color:var(--accent);}
-.fi::placeholder{color:var(--text-dim);}
-textarea.fi{resize:vertical;min-height:68px;font-family:var(--sans);}
-select.fi{cursor:pointer;}
-.form-footer{display:flex;align-items:center;gap:.55rem;margin-top:.8rem;padding-top:.8rem;border-top:1px solid var(--border);}
+    .admin-shell {
+      position: relative;
+      display: flex;
+      width: 100%;
+      height: 100%;
+      max-width: 1060px;
+      margin: 0 auto;
+      animation: slideIn .22s ease;
+    }
 
-.btn{font-family:var(--mono);font-size:.7rem;padding:.45rem .9rem;border-radius:var(--r);cursor:pointer;transition:all .18s;border:1px solid transparent;white-space:nowrap;}
-.btn-green{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);}
-.btn-green:hover{background:var(--accent);color:#071a0c;font-weight:700;}
-.btn-green:disabled{opacity:.35;cursor:not-allowed;}
-.btn-ghost{background:transparent;border-color:var(--border2);color:var(--text-muted);}
-.btn-ghost:hover{border-color:var(--border3);color:var(--text);}
-.btn-red{background:var(--red-dim);border-color:var(--red);color:var(--red);}
-.btn-red:hover{background:var(--red);color:#1a0606;}
-.btn-sm{padding:.25rem .55rem;font-size:.62rem;border-radius:5px;}
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(14px)
+      }
 
-/* color picker */
-.color-row{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.2rem;}
-.chip{width:20px;height:20px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:transform .15s;}
-.chip:hover{transform:scale(1.18);}
-.chip.sel{border-color:white;}
-.chip.none-chip{background:var(--surface3);border-color:var(--border2);}
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
 
-/* meta preview */
-.meta-preview{display:none;align-items:center;gap:.55rem;padding:.45rem .7rem;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);margin-bottom:.6rem;font-family:var(--mono);font-size:.68rem;color:var(--text-muted);}
-.meta-preview.show{display:flex;}
-.meta-preview img{width:16px;height:16px;object-fit:contain;border-radius:3px;}
-.meta-spinner{font-family:var(--mono);font-size:.66rem;color:var(--text-dim);display:none;margin-bottom:.6rem;}
-.meta-spinner.show{display:block;}
+    .admin-sidebar {
+      width: 190px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 1.25rem 0;
+    }
 
-/* ── ITEM ROWS ── */
-.item-list{display:flex;flex-direction:column;gap:.35rem;}
-.item-row{display:flex;align-items:center;gap:.65rem;padding:.6rem .8rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);transition:all .15s;}
-.item-row:hover{border-color:var(--border2);}
-.item-row.drag-over{border-color:var(--accent);background:var(--accent-dim);}
-.item-row.dragging{opacity:.35;}
-.drag-handle{color:var(--text-dim);font-size:.78rem;cursor:grab;user-select:none;flex-shrink:0;}
-.row-favicon{width:18px;height:18px;object-fit:contain;border-radius:3px;flex-shrink:0;}
-.row-emoji{font-size:.85rem;flex-shrink:0;}
-.row-info{flex:1;min-width:0;}
-.row-name{font-size:.8rem;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.row-sub{font-family:var(--mono);font-size:.58rem;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.row-badge{font-family:var(--mono);font-size:.58rem;color:var(--text-dim);background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:.1rem .35rem;flex-shrink:0;}
-.row-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-.row-actions{display:flex;gap:.3rem;flex-shrink:0;}
+    .admin-logo {
+      font-family: var(--mono);
+      font-size: .75rem;
+      color: var(--accent);
+      padding: 0 1.25rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: .75rem;
+      letter-spacing: .05em;
+    }
 
-/* ── EDIT MODAL ── */
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
-.modal-bg.open{display:flex;}
-.modal{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r2);padding:1.75rem;width:520px;max-width:95vw;max-height:90vh;overflow-y:auto;animation:slideIn .2s ease;}
-.modal-title{font-family:var(--mono);font-size:.78rem;color:var(--accent);letter-spacing:.04em;margin-bottom:1.25rem;padding-bottom:.7rem;border-bottom:1px solid var(--border);}
-.modal-footer{display:flex;gap:.5rem;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);}
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      padding: .5rem 1.25rem;
+      font-family: var(--mono);
+      font-size: .7rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all .15s;
+      border-left: 2px solid transparent;
+    }
 
-/* ── SETTINGS ── */
-.settings-group{margin-bottom:1.5rem;}
-.sg-title{font-family:var(--mono);font-size:.63rem;color:var(--text-dim);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.7rem;}
-.setting-row{display:flex;align-items:center;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);}
-.setting-row:last-child{border-bottom:none;}
-.setting-label{font-size:.84rem;color:var(--text);}
-.setting-desc{font-size:.7rem;color:var(--text-muted);margin-top:.12rem;}
-.range-wrap{display:flex;align-items:center;gap:.7rem;}
-.range-val{font-family:var(--mono);font-size:.78rem;color:var(--accent);min-width:1.4rem;text-align:center;}
-input[type=range]{-webkit-appearance:none;width:110px;height:3px;border-radius:2px;background:var(--border2);outline:none;cursor:pointer;}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--accent);cursor:pointer;}
-.toggle{position:relative;width:34px;height:19px;cursor:pointer;}
-.toggle input{display:none;}
-.toggle-track{position:absolute;inset:0;background:var(--border2);border-radius:10px;transition:background .18s;}
-.toggle input:checked~.toggle-track{background:var(--accent);}
-.toggle-thumb{position:absolute;top:3px;left:3px;width:13px;height:13px;border-radius:50%;background:white;transition:left .18s;}
-.toggle input:checked~.toggle-track .toggle-thumb{left:18px;}
+    .nav-item:hover {
+      color: var(--text);
+      background: var(--surface2);
+    }
 
-/* ── LOGIN ── */
-.login-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:400;align-items:center;justify-content:center;backdrop-filter:blur(6px);}
-.login-bg.open{display:flex;}
-.login-box{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r2);padding:2rem;width:310px;animation:slideIn .2s ease;}
-.login-title{font-family:var(--mono);font-size:.78rem;color:var(--text);margin-bottom:1.4rem;letter-spacing:.03em;}
-.login-err{font-family:var(--mono);font-size:.66rem;color:var(--red);display:none;margin-bottom:.6rem;}
-.login-actions{display:flex;gap:.5rem;margin-top:.5rem;}
+    .nav-item.active {
+      color: var(--accent);
+      border-left-color: var(--accent);
+      background: var(--accent-dim);
+    }
 
-/* ── TOAST ── */
-.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(14px);background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:.5rem 1rem;font-family:var(--mono);font-size:.7rem;color:var(--text);opacity:0;transition:all .22s;z-index:999;pointer-events:none;white-space:nowrap;}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-.toast.ok{border-color:var(--accent);color:var(--accent);background:var(--accent-dim);}
-.toast.err{border-color:var(--red);color:var(--red);background:var(--red-dim);}
-</style>
+    .nav-icon {
+      width: 14px;
+      text-align: center;
+      opacity: .7;
+    }
+
+    .admin-spacer {
+      flex: 1;
+    }
+
+    .admin-close-btn {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .55rem 1.25rem;
+      font-family: var(--mono);
+      font-size: .7rem;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all .15s;
+    }
+
+    .admin-close-btn:hover {
+      color: var(--red);
+    }
+
+    .admin-main {
+      flex: 1;
+      background: var(--bg);
+      overflow-y: auto;
+    }
+
+    .admin-tab {
+      display: none;
+      padding: 1.75rem 2rem;
+    }
+
+    .admin-tab.active {
+      display: block;
+    }
+
+    .tab-title {
+      font-family: var(--mono);
+      font-size: .68rem;
+      color: var(--text-muted);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      padding-bottom: .7rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── FORM BITS ── */
+    .card-form {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r2);
+      padding: 1.2rem;
+      margin-bottom: 1rem;
+    }
+
+    .g2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .7rem;
+    }
+
+    .g3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: .7rem;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: .28rem;
+      margin-bottom: .6rem;
+    }
+
+    .field:last-child {
+      margin-bottom: 0;
+    }
+
+    .fl {
+      font-family: var(--mono);
+      font-size: .6rem;
+      color: var(--text-muted);
+      letter-spacing: .07em;
+      text-transform: uppercase;
+    }
+
+    .fi {
+      background: var(--bg);
+      border: 1px solid var(--border2);
+      border-radius: var(--r);
+      padding: .45rem .7rem;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: .76rem;
+      outline: none;
+      transition: border-color .18s;
+      width: 100%;
+    }
+
+    .fi:focus {
+      border-color: var(--accent);
+    }
+
+    .fi::placeholder {
+      color: var(--text-dim);
+    }
+
+    textarea.fi {
+      resize: vertical;
+      min-height: 68px;
+      font-family: var(--sans);
+    }
+
+    select.fi {
+      cursor: pointer;
+    }
+
+    .form-footer {
+      display: flex;
+      align-items: center;
+      gap: .55rem;
+      margin-top: .8rem;
+      padding-top: .8rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .btn {
+      font-family: var(--mono);
+      font-size: .7rem;
+      padding: .45rem .9rem;
+      border-radius: var(--r);
+      cursor: pointer;
+      transition: all .18s;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .btn-green {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .btn-green:hover {
+      background: var(--accent);
+      color: #071a0c;
+      font-weight: 700;
+    }
+
+    .btn-green:disabled {
+      opacity: .35;
+      cursor: not-allowed;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border-color: var(--border2);
+      color: var(--text-muted);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--border3);
+      color: var(--text);
+    }
+
+    .btn-red {
+      background: var(--red-dim);
+      border-color: var(--red);
+      color: var(--red);
+    }
+
+    .btn-red:hover {
+      background: var(--red);
+      color: #1a0606;
+    }
+
+    .btn-sm {
+      padding: .25rem .55rem;
+      font-size: .62rem;
+      border-radius: 5px;
+    }
+
+    /* color picker */
+    .color-row {
+      display: flex;
+      gap: .4rem;
+      flex-wrap: wrap;
+      margin-top: .2rem;
+    }
+
+    .chip {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform .15s;
+    }
+
+    .chip:hover {
+      transform: scale(1.18);
+    }
+
+    .chip.sel {
+      border-color: white;
+    }
+
+    .chip.none-chip {
+      background: var(--surface3);
+      border-color: var(--border2);
+    }
+
+    /* meta preview */
+    .meta-preview {
+      display: none;
+      align-items: center;
+      gap: .55rem;
+      padding: .45rem .7rem;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: var(--r);
+      margin-bottom: .6rem;
+      font-family: var(--mono);
+      font-size: .68rem;
+      color: var(--text-muted);
+    }
+
+    .meta-preview.show {
+      display: flex;
+    }
+
+    .meta-preview img {
+      width: 16px;
+      height: 16px;
+      object-fit: contain;
+      border-radius: 3px;
+    }
+
+    .meta-spinner {
+      font-family: var(--mono);
+      font-size: .66rem;
+      color: var(--text-dim);
+      display: none;
+      margin-bottom: .6rem;
+    }
+
+    .meta-spinner.show {
+      display: block;
+    }
+
+    /* ── ITEM ROWS ── */
+    .item-list {
+      display: flex;
+      flex-direction: column;
+      gap: .35rem;
+    }
+
+    .item-row {
+      display: flex;
+      align-items: center;
+      gap: .65rem;
+      padding: .6rem .8rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      transition: all .15s;
+    }
+
+    .item-row:hover {
+      border-color: var(--border2);
+    }
+
+    .item-row.drag-over {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+    }
+
+    .item-row.dragging {
+      opacity: .35;
+    }
+
+    .drag-handle {
+      color: var(--text-dim);
+      font-size: .78rem;
+      cursor: grab;
+      user-select: none;
+      flex-shrink: 0;
+    }
+
+    .row-favicon {
+      width: 18px;
+      height: 18px;
+      object-fit: contain;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .row-emoji {
+      font-size: .85rem;
+      flex-shrink: 0;
+    }
+
+    .row-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .row-name {
+      font-size: .8rem;
+      font-weight: 500;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .row-sub {
+      font-family: var(--mono);
+      font-size: .58rem;
+      color: var(--text-dim);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .row-badge {
+      font-family: var(--mono);
+      font-size: .58rem;
+      color: var(--text-dim);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: .1rem .35rem;
+      flex-shrink: 0;
+    }
+
+    .row-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .row-actions {
+      display: flex;
+      gap: .3rem;
+      flex-shrink: 0;
+    }
+
+    /* ── EDIT MODAL ── */
+    .modal-bg {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .6);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-bg.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--r2);
+      padding: 1.75rem;
+      width: 520px;
+      max-width: 95vw;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: slideIn .2s ease;
+    }
+
+    .modal-title {
+      font-family: var(--mono);
+      font-size: .78rem;
+      color: var(--accent);
+      letter-spacing: .04em;
+      margin-bottom: 1.25rem;
+      padding-bottom: .7rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-footer {
+      display: flex;
+      gap: .5rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── SETTINGS ── */
+    .settings-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .sg-title {
+      font-family: var(--mono);
+      font-size: .63rem;
+      color: var(--text-dim);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: .7rem;
+    }
+
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .6rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .setting-row:last-child {
+      border-bottom: none;
+    }
+
+    .setting-label {
+      font-size: .84rem;
+      color: var(--text);
+    }
+
+    .setting-desc {
+      font-size: .7rem;
+      color: var(--text-muted);
+      margin-top: .12rem;
+    }
+
+    .range-wrap {
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+    }
+
+    .range-val {
+      font-family: var(--mono);
+      font-size: .78rem;
+      color: var(--accent);
+      min-width: 1.4rem;
+      text-align: center;
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 110px;
+      height: 3px;
+      border-radius: 2px;
+      background: var(--border2);
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+    }
+
+    .toggle {
+      position: relative;
+      width: 34px;
+      height: 19px;
+      cursor: pointer;
+    }
+
+    .toggle input {
+      display: none;
+    }
+
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      background: var(--border2);
+      border-radius: 10px;
+      transition: background .18s;
+    }
+
+    .toggle input:checked~.toggle-track {
+      background: var(--accent);
+    }
+
+    .toggle-thumb {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: white;
+      transition: left .18s;
+    }
+
+    .toggle input:checked~.toggle-track .toggle-thumb {
+      left: 18px;
+    }
+
+    /* ── LOGIN ── */
+    .login-bg {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .7);
+      z-index: 400;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(6px);
+    }
+
+    .login-bg.open {
+      display: flex;
+    }
+
+    .login-box {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--r2);
+      padding: 2rem;
+      width: 310px;
+      animation: slideIn .2s ease;
+    }
+
+    .login-title {
+      font-family: var(--mono);
+      font-size: .78rem;
+      color: var(--text);
+      margin-bottom: 1.4rem;
+      letter-spacing: .03em;
+    }
+
+    .login-err {
+      font-family: var(--mono);
+      font-size: .66rem;
+      color: var(--red);
+      display: none;
+      margin-bottom: .6rem;
+    }
+
+    .login-actions {
+      display: flex;
+      gap: .5rem;
+      margin-top: .5rem;
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(14px);
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: var(--r);
+      padding: .5rem 1rem;
+      font-family: var(--mono);
+      font-size: .7rem;
+      color: var(--text);
+      opacity: 0;
+      transition: all .22s;
+      z-index: 999;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .toast.ok {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-dim);
+    }
+
+    .toast.err {
+      border-color: var(--red);
+      color: var(--red);
+      background: var(--red-dim);
+    }
+  </style>
 </head>
+
 <body>
 
-<header>
-  <div class="logo"><em>//</em> <span class="js-site-name">jarvis</span></div>
-  <div class="header-right">
-    <span class="hdr-clock"><span class="dot"></span><span id="clock"></span></span>
-    <button class="btn-admin" onclick="openLogin()">admin →</button>
-  </div>
-</header>
-
-<main>
-  <div class="hero">
-    <div class="hero-tag" id="heroTag">good <span id="timeOfDay">morning</span></div>
-    <h1 class="js-site-name">jarvis</h1>
-    <p id="heroSubtitle">your local services, in one place.</p>
-  </div>
-  <div class="search-wrap">
-    <span class="search-icon">⌕</span>
-    <input class="search-input" id="searchInput" type="text" placeholder="filter services..." oninput="filterCards()">
-  </div>
-  <div id="categoriesContainer"></div>
-  <div class="notes-section">
-    <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.85rem;">
-      <span style="font-family:var(--mono);font-size:.65rem;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase;">notes</span>
-      <span style="flex:1;height:1px;background:var(--border);display:inline-block;"></span>
+  <header>
+    <div class="logo"><em>//</em> <span class="js-site-name">jarvis</span> <span id="version"
+        style="color:var(--text-dim);font-size:.6rem;margin-left:.5rem;"></span></div>
+    <div class="header-right">
+      <span class="hdr-clock"><span class="dot"></span><span id="clock"></span></span>
+      <button class="btn-admin" onclick="openLogin()">admin →</button>
     </div>
-    <div class="notes-list" id="notesList"><div class="empty">loading...</div></div>
-  </div>
-</main>
+  </header>
 
-<footer id="footerDate"></footer>
+  <main>
+    <div class="hero">
+      <div class="hero-tag" id="heroTag">good <span id="timeOfDay">morning</span></div>
+      <h1 class="js-site-name">jarvis</h1>
+      <p id="heroSubtitle">your local services, in one place.</p>
+    </div>
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input class="search-input" id="searchInput" type="text" placeholder="filter services..." oninput="filterCards()">
+    </div>
+    <div id="categoriesContainer"></div>
+    <div class="notes-section">
+      <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.85rem;">
+        <span
+          style="font-family:var(--mono);font-size:.65rem;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase;">notes</span>
+        <span style="flex:1;height:1px;background:var(--border);display:inline-block;"></span>
+      </div>
+      <div class="notes-list" id="notesList">
+        <div class="empty">loading...</div>
+      </div>
+    </div>
+  </main>
 
-<!-- LOGIN -->
-<div class="login-bg" id="loginBg">
-  <div class="login-box">
-    <div class="login-title">// admin access</div>
-    <div class="field"><label class="fl">username</label><input class="fi" id="loginUser" type="text" autocomplete="username"></div>
-    <div class="field"><label class="fl">password</label><input class="fi" id="loginPass" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')tryLogin()"></div>
-    <div class="login-err" id="loginErr">invalid credentials</div>
-    <div class="login-actions">
-      <button class="btn btn-green" style="flex:1" onclick="tryLogin()">unlock</button>
-      <button class="btn btn-ghost" onclick="closeLogin()">cancel</button>
+  <footer id="footerDate"></footer>
+
+  <!-- LOGIN -->
+  <div class="login-bg" id="loginBg">
+    <div class="login-box">
+      <div class="login-title">// admin access</div>
+      <div class="field"><label class="fl">username</label><input class="fi" id="loginUser" type="text"
+          autocomplete="username"></div>
+      <div class="field"><label class="fl">password</label><input class="fi" id="loginPass" type="password"
+          autocomplete="current-password" onkeydown="if(event.key==='Enter')tryLogin()"></div>
+      <div class="login-err" id="loginErr">invalid credentials</div>
+      <div class="login-actions">
+        <button class="btn btn-green" style="flex:1" onclick="tryLogin()">unlock</button>
+        <button class="btn btn-ghost" onclick="closeLogin()">cancel</button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ADMIN OVERLAY -->
-<div class="admin-overlay" id="adminOverlay">
-  <div class="admin-backdrop" onclick="closeAdmin()"></div>
-  <div class="admin-shell">
-    <div class="admin-sidebar">
-      <div class="admin-logo">// admin</div>
-      <div class="nav-item active" onclick="switchTab('services')" id="nav-services"><span class="nav-icon">◈</span> services</div>
-      <div class="nav-item" onclick="switchTab('categories')" id="nav-categories"><span class="nav-icon">⊟</span> categories</div>
-      <div class="nav-item" onclick="switchTab('notes')" id="nav-notes"><span class="nav-icon">◇</span> notes</div>
-      <div class="nav-item" onclick="switchTab('layout')" id="nav-layout"><span class="nav-icon">⊞</span> layout</div>
-      <div class="nav-item" onclick="switchTab('appearance')" id="nav-appearance"><span class="nav-icon">◑</span> appearance</div>
-      <div class="nav-item" onclick="switchTab('security')" id="nav-security"><span class="nav-icon">◉</span> security</div>
-      <div class="admin-spacer"></div>
-      <div class="admin-close-btn" onclick="closeAdmin()">✕ close panel</div>
-    </div>
-    <div class="admin-main">
-
-      <!-- SERVICES TAB -->
-      <div class="admin-tab active" id="tab-services">
-        <div class="tab-title">services / links</div>
-        <div class="card-form">
-          <div class="field"><label class="fl">url — paste first, we'll fetch the rest</label>
-            <input class="fi" id="addUrl" type="url" placeholder="http://192.168.1.x:8096" onblur="autoFetchMeta()">
-          </div>
-          <div class="meta-spinner" id="metaSpinner">fetching site info...</div>
-          <div class="meta-preview" id="metaPreview"><img id="metaFavicon" src="" alt=""><span id="metaTitle"></span></div>
-          <div class="g2">
-            <div class="field"><label class="fl">name</label><input class="fi" id="addName" type="text" placeholder="Jellyfin"></div>
-            <div class="field"><label class="fl">category</label>
-              <select class="fi" id="addCategory"><option value="">— none —</option></select>
-            </div>
-          </div>
-          <div class="field"><label class="fl">description</label><input class="fi" id="addDesc" type="text" placeholder="Media server"></div>
-          <div class="g2">
-            <div class="field"><label class="fl">emoji override</label><input class="fi" id="addIcon" type="text" placeholder="leave blank = favicon" maxlength="4"></div>
-            <div class="field"><label class="fl">accent colour</label><div class="color-row" id="addColorRow"></div></div>
-          </div>
-          <div class="form-footer">
-            <button class="btn btn-green" id="addLinkBtn" onclick="addLink()">+ add service</button>
-          </div>
+  <!-- ADMIN OVERLAY -->
+  <div class="admin-overlay" id="adminOverlay">
+    <div class="admin-backdrop" onclick="closeAdmin()"></div>
+    <div class="admin-shell">
+      <div class="admin-sidebar">
+        <div class="admin-logo">// admin</div>
+        <div class="nav-item active" onclick="switchTab('services')" id="nav-services"><span class="nav-icon">◈</span>
+          services</div>
+        <div class="nav-item" onclick="switchTab('categories')" id="nav-categories"><span class="nav-icon">⊟</span>
+          categories</div>
+        <div class="nav-item" onclick="switchTab('notes')" id="nav-notes"><span class="nav-icon">◇</span> notes</div>
+        <div class="nav-item" onclick="switchTab('layout')" id="nav-layout"><span class="nav-icon">⊞</span> layout</div>
+        <div class="nav-item" onclick="switchTab('appearance')" id="nav-appearance"><span class="nav-icon">◑</span>
+          appearance</div>
+        <div class="nav-item" onclick="switchTab('security')" id="nav-security"><span class="nav-icon">◉</span> security
         </div>
-        <div class="item-list" id="adminLinkList"></div>
+        <div class="admin-spacer"></div>
+        <div class="admin-close-btn" onclick="closeAdmin()">✕ close panel</div>
       </div>
+      <div class="admin-main">
 
-      <!-- CATEGORIES TAB -->
-      <div class="admin-tab" id="tab-categories">
-        <div class="tab-title">categories</div>
-        <div class="card-form">
-          <div class="g2">
-            <div class="field"><label class="fl">name</label><input class="fi" id="catName" type="text" placeholder="Media"></div>
-            <div class="field"><label class="fl">icon (emoji)</label><input class="fi" id="catIcon" type="text" placeholder="📺" maxlength="4"></div>
-          </div>
-          <div class="form-footer">
-            <button class="btn btn-green" onclick="addCategory()">+ add category</button>
-          </div>
-        </div>
-        <div class="item-list" id="adminCatList"></div>
-      </div>
-
-      <!-- NOTES TAB -->
-      <div class="admin-tab" id="tab-notes">
-        <div class="tab-title">notes &amp; announcements</div>
-        <div class="card-form">
-          <div class="field"><label class="fl">new note</label>
-            <textarea class="fi" id="addNoteContent" placeholder="Write a note, reminder, or announcement..."></textarea>
-          </div>
-          <div class="form-footer"><button class="btn btn-green" id="addNoteBtn" onclick="addNote()">+ add note</button></div>
-        </div>
-        <div class="item-list" id="adminNoteList"></div>
-      </div>
-
-      <!-- LAYOUT TAB -->
-      <div class="admin-tab" id="tab-layout">
-        <div class="tab-title">layout &amp; display</div>
-        <div class="settings-group">
-          <div class="sg-title">grid</div>
-          <div class="setting-row">
-            <div><div class="setting-label">columns</div><div class="setting-desc">desktop card columns</div></div>
-            <div class="range-wrap"><span class="range-val" id="colsVal">4</span>
-              <input type="range" id="colsRange" min="2" max="8" value="4" oninput="previewCols(this.value)" onchange="saveCols(this.value)">
-            </div>
-          </div>
-          <div class="setting-row">
-            <div><div class="setting-label">compact mode</div><div class="setting-desc">smaller cards, hides desc &amp; url</div></div>
-            <label class="toggle"><input type="checkbox" id="compactToggle" onchange="saveCompact(this.checked)"><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
-          </div>
-        </div>
-      </div>
-
-      <!-- APPEARANCE TAB -->
-      <div class="admin-tab" id="tab-appearance">
-        <div class="tab-title">appearance</div>
-        <div class="settings-group">
-          <div class="sg-title">branding</div>
+        <!-- SERVICES TAB -->
+        <div class="admin-tab active" id="tab-services">
+          <div class="tab-title">services / links</div>
           <div class="card-form">
-            <div class="g2">
-              <div class="field"><label class="fl">site name</label><input class="fi" id="apName" placeholder="jarvis"></div>
-              <div class="field"><label class="fl">greeting tag</label><input class="fi" id="apTag" placeholder="good morning..."></div>
+            <div class="field"><label class="fl">url — paste first, we'll fetch the rest</label>
+              <input class="fi" id="addUrl" type="url" placeholder="http://192.168.1.x:8096" onblur="autoFetchMeta()">
             </div>
-            <div class="field"><label class="fl">subtitle</label><input class="fi" id="apSubtitle" placeholder="your local services, in one place."></div>
-            <div class="field"><label class="fl">footer text</label><input class="fi" id="apFooter" placeholder="jarvis · running on your lan"></div>
-            <div class="form-footer"><button class="btn btn-green" onclick="saveAppearance()">save branding</button></div>
-          </div>
-        </div>
-        <div class="settings-group">
-          <div class="sg-title">colours</div>
-          <div class="card-form">
+            <div class="meta-spinner" id="metaSpinner">fetching site info...</div>
+            <div class="meta-preview" id="metaPreview"><img id="metaFavicon" src="" alt=""><span id="metaTitle"></span>
+            </div>
             <div class="g2">
-              <div class="field"><label class="fl">accent</label>
-                <div style="display:flex;align-items:center;gap:.5rem;">
-                  <input type="color" id="apAccent" value="#4ade80" style="width:34px;height:34px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);cursor:pointer;padding:2px;flex-shrink:0;">
-                  <input class="fi" id="apAccentHex" value="#4ade80" style="flex:1;">
-                </div>
+              <div class="field"><label class="fl">name</label><input class="fi" id="addName" type="text"
+                  placeholder="Jellyfin"></div>
+              <div class="field"><label class="fl">category</label>
+                <select class="fi" id="addCategory">
+                  <option value="">— none —</option>
+                </select>
               </div>
-              <div class="field"><label class="fl">background</label>
-                <div style="display:flex;align-items:center;gap:.5rem;">
-                  <input type="color" id="apBg" value="#0c0e13" style="width:34px;height:34px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);cursor:pointer;padding:2px;flex-shrink:0;">
-                  <input class="fi" id="apBgHex" value="#0c0e13" style="flex:1;">
-                </div>
-              </div>
-              <div class="field"><label class="fl">surface</label>
-                <div style="display:flex;align-items:center;gap:.5rem;">
-                  <input type="color" id="apSurface" value="#12151c" style="width:34px;height:34px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);cursor:pointer;padding:2px;flex-shrink:0;">
-                  <input class="fi" id="apSurfaceHex" value="#12151c" style="flex:1;">
-                </div>
-              </div>
-              <div class="field"><label class="fl">text</label>
-                <div style="display:flex;align-items:center;gap:.5rem;">
-                  <input type="color" id="apText" value="#e4e8f0" style="width:34px;height:34px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);cursor:pointer;padding:2px;flex-shrink:0;">
-                  <input class="fi" id="apTextHex" value="#e4e8f0" style="flex:1;">
-                </div>
+            </div>
+            <div class="field"><label class="fl">description</label><input class="fi" id="addDesc" type="text"
+                placeholder="Media server"></div>
+            <div class="g2">
+              <div class="field"><label class="fl">emoji override</label><input class="fi" id="addIcon" type="text"
+                  placeholder="leave blank = favicon" maxlength="4"></div>
+              <div class="field"><label class="fl">accent colour</label>
+                <div class="color-row" id="addColorRow"></div>
               </div>
             </div>
             <div class="form-footer">
-              <button class="btn btn-green" onclick="saveAppearance()">save colours</button>
-              <button class="btn btn-ghost" onclick="resetAppearance()">reset defaults</button>
+              <button class="btn btn-green" id="addLinkBtn" onclick="addLink()">+ add service</button>
             </div>
           </div>
+          <div class="item-list" id="adminLinkList"></div>
         </div>
-        <div class="settings-group">
-          <div class="sg-title">typography</div>
+
+        <!-- CATEGORIES TAB -->
+        <div class="admin-tab" id="tab-categories">
+          <div class="tab-title">categories</div>
           <div class="card-form">
             <div class="g2">
-              <div class="field"><label class="fl">body font</label>
-                <select class="fi" id="apSansFont">
-                  <option value="'DM Sans',system-ui,sans-serif">DM Sans (default)</option>
-                  <option value="system-ui,sans-serif">System UI</option>
-                  <option value="'Inter',system-ui,sans-serif">Inter</option>
-                  <option value="'Roboto',system-ui,sans-serif">Roboto</option>
-                  <option value="Georgia,serif">Georgia (serif)</option>
-                </select>
+              <div class="field"><label class="fl">name</label><input class="fi" id="catName" type="text"
+                  placeholder="Media"></div>
+              <div class="field"><label class="fl">icon (emoji)</label><input class="fi" id="catIcon" type="text"
+                  placeholder="📺" maxlength="4"></div>
+            </div>
+            <div class="form-footer">
+              <button class="btn btn-green" onclick="addCategory()">+ add category</button>
+            </div>
+          </div>
+          <div class="item-list" id="adminCatList"></div>
+        </div>
+
+        <!-- NOTES TAB -->
+        <div class="admin-tab" id="tab-notes">
+          <div class="tab-title">notes &amp; announcements</div>
+          <div class="card-form">
+            <div class="field"><label class="fl">new note</label>
+              <textarea class="fi" id="addNoteContent"
+                placeholder="Write a note, reminder, or announcement..."></textarea>
+            </div>
+            <div class="form-footer"><button class="btn btn-green" id="addNoteBtn" onclick="addNote()">+ add
+                note</button></div>
+          </div>
+          <div class="item-list" id="adminNoteList"></div>
+        </div>
+
+        <!-- LAYOUT TAB -->
+        <div class="admin-tab" id="tab-layout">
+          <div class="tab-title">layout &amp; display</div>
+          <div class="settings-group">
+            <div class="sg-title">grid</div>
+            <div class="setting-row">
+              <div>
+                <div class="setting-label">columns</div>
+                <div class="setting-desc">desktop card columns</div>
               </div>
-              <div class="field"><label class="fl">mono font</label>
-                <select class="fi" id="apMonoFont">
-                  <option value="'Berkeley Mono','Fira Mono',monospace">Berkeley Mono (default)</option>
-                  <option value="'Fira Mono',monospace">Fira Mono</option>
-                  <option value="'JetBrains Mono',monospace">JetBrains Mono</option>
-                  <option value="'Courier New',monospace">Courier New</option>
-                  <option value="monospace">System Mono</option>
-                </select>
+              <div class="range-wrap"><span class="range-val" id="colsVal">4</span>
+                <input type="range" id="colsRange" min="2" max="8" value="4" oninput="previewCols(this.value)"
+                  onchange="saveCols(this.value)">
               </div>
             </div>
-            <div class="form-footer"><button class="btn btn-green" onclick="saveAppearance()">save fonts</button></div>
+            <div class="setting-row">
+              <div>
+                <div class="setting-label">compact mode</div>
+                <div class="setting-desc">smaller cards, hides desc &amp; url</div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="compactToggle" onchange="saveCompact(this.checked)">
+                <div class="toggle-track">
+                  <div class="toggle-thumb"></div>
+                </div>
+              </label>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- SECURITY TAB -->
-      <div class="admin-tab" id="tab-security">
-        <div class="tab-title">credentials</div>
-        <div class="card-form">
-          <div class="field"><label class="fl">username</label><input class="fi" id="secUser" type="text" autocomplete="off"></div>
-          <div class="g2">
-            <div class="field"><label class="fl">new password</label><input class="fi" id="secPass" type="password" placeholder="leave blank to keep" autocomplete="new-password"></div>
-            <div class="field"><label class="fl">confirm</label><input class="fi" id="secPassConfirm" type="password" autocomplete="new-password"></div>
+        <!-- APPEARANCE TAB -->
+        <div class="admin-tab" id="tab-appearance">
+          <div class="tab-title">appearance</div>
+          <div class="settings-group">
+            <div class="sg-title">branding</div>
+            <div class="card-form">
+              <div class="g2">
+                <div class="field"><label class="fl">site name</label><input class="fi" id="apName"
+                    placeholder="jarvis"></div>
+                <div class="field"><label class="fl">greeting tag</label><input class="fi" id="apTag"
+                    placeholder="good morning..."></div>
+              </div>
+              <div class="field"><label class="fl">subtitle</label><input class="fi" id="apSubtitle"
+                  placeholder="your local services, in one place."></div>
+              <div class="field"><label class="fl">footer text</label><input class="fi" id="apFooter"
+                  placeholder="jarvis · running on your lan"></div>
+              <div class="form-footer"><button class="btn btn-green" onclick="saveAppearance()">save branding</button>
+              </div>
+            </div>
           </div>
-          <div class="form-footer"><button class="btn btn-green" onclick="saveCredentials()">update credentials</button></div>
+          <div class="settings-group">
+            <div class="sg-title">colours</div>
+            <div class="card-form">
+              <div class="g2">
+                <div class="field"><label class="fl">accent</label>
+                  <div style="display:flex;align-items:center;gap:.5rem;">
+                    <input type="color" id="apAccent" value="#4ade80"
+                      style="width:34px;height:34px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);cursor:pointer;padding:2px;flex-shrink:0;">
+                    <input class="fi" id="apAccentHex" value="#4ade80" style="flex:1;">
+                  </div>
+                </div>
+                <div class="field"><label class="fl">background</label>
+                  <div style="display:flex;align-items:center;gap:.5rem;">
+                    <input type="color" id="apBg" value="#0c0e13"
+                      style="width:34px;height:34px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);cursor:pointer;padding:2px;flex-shrink:0;">
+                    <input class="fi" id="apBgHex" value="#0c0e13" style="flex:1;">
+                  </div>
+                </div>
+                <div class="field"><label class="fl">surface</label>
+                  <div style="display:flex;align-items:center;gap:.5rem;">
+                    <input type="color" id="apSurface" value="#12151c"
+                      style="width:34px;height:34px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);cursor:pointer;padding:2px;flex-shrink:0;">
+                    <input class="fi" id="apSurfaceHex" value="#12151c" style="flex:1;">
+                  </div>
+                </div>
+                <div class="field"><label class="fl">text</label>
+                  <div style="display:flex;align-items:center;gap:.5rem;">
+                    <input type="color" id="apText" value="#e4e8f0"
+                      style="width:34px;height:34px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);cursor:pointer;padding:2px;flex-shrink:0;">
+                    <input class="fi" id="apTextHex" value="#e4e8f0" style="flex:1;">
+                  </div>
+                </div>
+              </div>
+              <div class="form-footer">
+                <button class="btn btn-green" onclick="saveAppearance()">save colours</button>
+                <button class="btn btn-ghost" onclick="resetAppearance()">reset defaults</button>
+              </div>
+            </div>
+          </div>
+          <div class="settings-group">
+            <div class="sg-title">typography</div>
+            <div class="card-form">
+              <div class="g2">
+                <div class="field"><label class="fl">body font</label>
+                  <select class="fi" id="apSansFont">
+                    <option value="'DM Sans',system-ui,sans-serif">DM Sans (default)</option>
+                    <option value="system-ui,sans-serif">System UI</option>
+                    <option value="'Inter',system-ui,sans-serif">Inter</option>
+                    <option value="'Roboto',system-ui,sans-serif">Roboto</option>
+                    <option value="Georgia,serif">Georgia (serif)</option>
+                  </select>
+                </div>
+                <div class="field"><label class="fl">mono font</label>
+                  <select class="fi" id="apMonoFont">
+                    <option value="'Berkeley Mono','Fira Mono',monospace">Berkeley Mono (default)</option>
+                    <option value="'Fira Mono',monospace">Fira Mono</option>
+                    <option value="'JetBrains Mono',monospace">JetBrains Mono</option>
+                    <option value="'Courier New',monospace">Courier New</option>
+                    <option value="monospace">System Mono</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-footer"><button class="btn btn-green" onclick="saveAppearance()">save fonts</button>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
 
+        <!-- SECURITY TAB -->
+        <div class="admin-tab" id="tab-security">
+          <div class="tab-title">credentials</div>
+          <div class="card-form">
+            <div class="field"><label class="fl">username</label><input class="fi" id="secUser" type="text"
+                autocomplete="off"></div>
+            <div class="g2">
+              <div class="field"><label class="fl">new password</label><input class="fi" id="secPass" type="password"
+                  placeholder="leave blank to keep" autocomplete="new-password"></div>
+              <div class="field"><label class="fl">confirm</label><input class="fi" id="secPassConfirm" type="password"
+                  autocomplete="new-password"></div>
+            </div>
+            <div class="form-footer"><button class="btn btn-green" onclick="saveCredentials()">update
+                credentials</button></div>
+          </div>
+        </div>
+
+      </div>
     </div>
   </div>
-</div>
 
-<!-- EDIT MODAL (shared for links, categories, notes) -->
-<div class="modal-bg" id="editModal">
-  <div class="modal" id="editModalBody"></div>
-</div>
+  <!-- EDIT MODAL (shared for links, categories, notes) -->
+  <div class="modal-bg" id="editModal">
+    <div class="modal" id="editModalBody"></div>
+  </div>
 
-<div class="toast" id="toast"></div>
+  <div class="toast" id="toast"></div>
 
-<script>
-// ════════════════════════════════════════
-// STATE
-// ════════════════════════════════════════
-const COLORS = [
-  {label:'none',val:null},{label:'green',val:'#4ade80'},{label:'blue',val:'#38bdf8'},
-  {label:'purple',val:'#a78bfa'},{label:'orange',val:'#fb923c'},{label:'red',val:'#f87171'},
-  {label:'yellow',val:'#facc15'},{label:'pink',val:'#f472b6'},
-];
-const AP_DEF = {
-  name:'jarvis',tag:'',subtitle:'your local services, in one place.',footer:'',
-  accent:'#4ade80',bg:'#0c0e13',surface:'#12151c',text:'#e4e8f0',
-  sansFont:"'DM Sans',system-ui,sans-serif",
-  monoFont:"'Berkeley Mono','Fira Mono',monospace"
-};
+  <script>
+    // ════════════════════════════════════════
+    // STATE
+    // ════════════════════════════════════════
+    const COLORS = [
+      { label: 'none', val: null }, { label: 'green', val: '#4ade80' }, { label: 'blue', val: '#38bdf8' },
+      { label: 'purple', val: '#a78bfa' }, { label: 'orange', val: '#fb923c' }, { label: 'red', val: '#f87171' },
+      { label: 'yellow', val: '#facc15' }, { label: 'pink', val: '#f472b6' },
+    ];
+    const VERSION = '1.0.0';
+    const AP_DEF = {
+      name: 'jarvis', tag: '', subtitle: 'your local services, in one place.', footer: '',
+      accent: '#4ade80', bg: '#0c0e13', surface: '#12151c', text: '#e4e8f0',
+      sansFont: "'DM Sans',system-ui,sans-serif",
+      monoFont: "'Berkeley Mono','Fira Mono',monospace"
+    };
 
-let state = { links:[], notes:[], categories:[], settings:{columns:4,compactMode:false}, appearance:{} };
-let pendingFavicon = null;
-let addColor = null;
-let dragSrc = null;
-// track collapsed state client-side
-let collapsedCats = {};
+    let state = { links: [], notes: [], categories: [], settings: { columns: 4, compactMode: false }, appearance: {} };
+    let pendingFavicon = null;
+    let addColor = null;
+    let dragSrc = null;
+    // track collapsed state client-side
+    let collapsedCats = {};
 
-// ════════════════════════════════════════
-// INIT
-// ════════════════════════════════════════
-async function init() {
-  updateClock(); setInterval(updateClock,1000);
-  buildColorPicker('addColorRow', c=>{ addColor=c; });
-  wireColorPickers();
-  await loadData();
-}
-
-async function loadData() {
-  try {
-    const d = await api('GET','/api/data');
-    state = { ...state, ...d };
-    applySettings(state.settings);
-    applyAppearance(state.appearance||{});
-    renderHome();
-  } catch(e){ console.error(e); }
-}
-
-// ════════════════════════════════════════
-// CLOCK
-// ════════════════════════════════════════
-function updateClock() {
-  const now=new Date(), h=now.getHours();
-  document.getElementById('clock').textContent = now.toLocaleTimeString('en-IE',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
-  const tod=document.getElementById('timeOfDay'); if(tod) tod.textContent=h<12?'morning':h<18?'afternoon':'evening';
-  const fp=window._footerPrefix||'jarvis · running on your lan';
-  const fe=document.getElementById('footerDate'); if(fe) fe.textContent=fp+' · '+now.toLocaleDateString('en-IE',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-}
-
-// ════════════════════════════════════════
-// UTILS
-// ════════════════════════════════════════
-function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-function toast(msg,type='ok'){
-  const el=document.getElementById('toast');
-  el.textContent=msg; el.className=`toast show ${type}`;
-  clearTimeout(el._t); el._t=setTimeout(()=>el.className='toast',2400);
-}
-
-async function api(method, path, body){
-  const res=await fetch(path,{method,headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
-  const data=await res.json();
-  if(!res.ok) throw new Error(data.error||'error');
-  return data;
-}
-
-function faviconSrc(url){ return '/api/proxy-favicon?url='+encodeURIComponent(url); }
-
-function faviconImg(link, size){
-  if(link.faviconUrl)
-    return `<img class="card-favicon" src="${esc(faviconSrc(link.faviconUrl))}" width="${size}" height="${size}" alt="" onerror="this.style.display='none';if(this.nextSibling)this.nextSibling.style.display=''"><span style="display:none;font-size:${size>16?'1.05':'0.85'}rem">${esc(link.icon||'🔗')}</span>`;
-  return `<span style="font-size:${size>16?'1.05':'0.85'}rem">${esc(link.icon||'🔗')}</span>`;
-}
-
-function buildColorPicker(id, onChange, currentVal=null){
-  const row=document.getElementById(id); if(!row) return;
-  row.innerHTML='';
-  COLORS.forEach(c=>{
-    const chip=document.createElement('div');
-    chip.className='chip'+(c.val===null?' none-chip':'');
-    if(c.val) chip.style.background=c.val;
-    chip.title=c.label;
-    if(c.val===currentVal||(c.val===null&&currentVal===null||currentVal===undefined&&c.val===null))
-      chip.classList.add('sel');
-    chip.onclick=()=>{ row.querySelectorAll('.chip').forEach(ch=>ch.classList.remove('sel')); chip.classList.add('sel'); onChange(c.val); };
-    row.appendChild(chip);
-  });
-}
-
-function getCategoryName(id){
-  const c=state.categories.find(c=>c.id===id); return c?c.name:'';
-}
-
-// ════════════════════════════════════════
-// HOME RENDER
-// ════════════════════════════════════════
-function renderHome(){
-  renderCategories();
-  renderNotes(state.notes);
-}
-
-function renderCategories(){
-  const container=document.getElementById('categoriesContainer');
-  const cats = state.categories||[];
-  const links = state.links||[];
-
-  // group links
-  const byCategory={};
-  const uncategorised=[];
-  links.forEach((l,i)=>{
-    if(l.category && cats.find(c=>c.id===l.category)) {
-      if(!byCategory[l.category]) byCategory[l.category]=[];
-      byCategory[l.category].push({l,i});
-    } else {
-      uncategorised.push({l,i});
+    // ════════════════════════════════════════
+    // INIT
+    // ════════════════════════════════════════
+    async function init() {
+      document.getElementById('version').textContent = `v${VERSION}`;
+      updateClock(); setInterval(updateClock, 1000);
+      buildColorPicker('addColorRow', c => { addColor = c; });
+      wireColorPickers();
+      await loadData();
     }
-  });
 
-  let html='';
+    async function loadData() {
+      try {
+        const d = await api('GET', '/api/data');
+        state = { ...state, ...d };
+        applySettings(state.settings);
+        applyAppearance(state.appearance || {});
+        renderHome();
+      } catch (e) { console.error(e); }
+    }
 
-  // render each category
-  cats.forEach(cat=>{
-    const items=byCategory[cat.id]||[];
-    const isCollapsed=collapsedCats[cat.id]||false;
-    html+=`<div class="cat-section" id="catsec-${cat.id}">
+    // ════════════════════════════════════════
+    // CLOCK
+    // ════════════════════════════════════════
+    function updateClock() {
+      const now = new Date(), h = now.getHours();
+      document.getElementById('clock').textContent = now.toLocaleTimeString('en-IE', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+      const tod = document.getElementById('timeOfDay'); if (tod) tod.textContent = h < 12 ? 'morning' : h < 18 ? 'afternoon' : 'evening';
+      const fp = window._footerPrefix || 'jarvis · running on your lan';
+      const fe = document.getElementById('footerDate'); if (fe) fe.textContent = fp + ' · ' + now.toLocaleDateString('en-IE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    }
+
+    // ════════════════════════════════════════
+    // UTILS
+    // ════════════════════════════════════════
+    function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+    function toast(msg, type = 'ok') {
+      const el = document.getElementById('toast');
+      el.textContent = msg; el.className = `toast show ${type}`;
+      clearTimeout(el._t); el._t = setTimeout(() => el.className = 'toast', 2400);
+    }
+
+    async function api(method, path, body) {
+      const res = await fetch(path, { method, headers: { 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'error');
+      return data;
+    }
+
+    function faviconSrc(url) { return '/api/proxy-favicon?url=' + encodeURIComponent(url); }
+
+    function faviconImg(link, size) {
+      if (link.faviconUrl)
+        return `<img class="card-favicon" src="${esc(faviconSrc(link.faviconUrl))}" width="${size}" height="${size}" alt="" onerror="this.style.display='none';if(this.nextSibling)this.nextSibling.style.display=''"><span style="display:none;font-size:${size > 16 ? '1.05' : '0.85'}rem">${esc(link.icon || '🔗')}</span>`;
+      return `<span style="font-size:${size > 16 ? '1.05' : '0.85'}rem">${esc(link.icon || '🔗')}</span>`;
+    }
+
+    function buildColorPicker(id, onChange, currentVal = null) {
+      const row = document.getElementById(id); if (!row) return;
+      row.innerHTML = '';
+      COLORS.forEach(c => {
+        const chip = document.createElement('div');
+        chip.className = 'chip' + (c.val === null ? ' none-chip' : '');
+        if (c.val) chip.style.background = c.val;
+        chip.title = c.label;
+        if (c.val === currentVal || (c.val === null && currentVal === null || currentVal === undefined && c.val === null))
+          chip.classList.add('sel');
+        chip.onclick = () => { row.querySelectorAll('.chip').forEach(ch => ch.classList.remove('sel')); chip.classList.add('sel'); onChange(c.val); };
+        row.appendChild(chip);
+      });
+    }
+
+    function getCategoryName(id) {
+      const c = state.categories.find(c => c.id === id); return c ? c.name : '';
+    }
+
+    // ════════════════════════════════════════
+    // HOME RENDER
+    // ════════════════════════════════════════
+    function renderHome() {
+      renderCategories();
+      renderNotes(state.notes);
+    }
+
+    function renderCategories() {
+      const container = document.getElementById('categoriesContainer');
+      const cats = state.categories || [];
+      const links = state.links || [];
+
+      // group links
+      const byCategory = {};
+      const uncategorised = [];
+      links.forEach((l, i) => {
+        if (l.category && cats.find(c => c.id === l.category)) {
+          if (!byCategory[l.category]) byCategory[l.category] = [];
+          byCategory[l.category].push({ l, i });
+        } else {
+          uncategorised.push({ l, i });
+        }
+      });
+
+      let html = '';
+
+      // render each category
+      cats.forEach(cat => {
+        const items = byCategory[cat.id] || [];
+        const isCollapsed = collapsedCats[cat.id] || false;
+        html += `<div class="cat-section" id="catsec-${cat.id}">
       <div class="cat-header" onclick="toggleCat('${cat.id}')">
-        <span class="cat-toggle ${isCollapsed?'':'open'}">▶</span>
-        <span class="cat-icon">${esc(cat.icon||'📁')}</span>
+        <span class="cat-toggle ${isCollapsed ? '' : 'open'}">▶</span>
+        <span class="cat-icon">${esc(cat.icon || '📁')}</span>
         <span class="cat-name">${esc(cat.name)}</span>
         <span class="cat-count">${items.length}</span>
         <span class="cat-line"></span>
       </div>
-      <div class="cat-body ${isCollapsed?'collapsed':''}" id="catbody-${cat.id}" style="max-height:${isCollapsed?'0':'2000px'}">
+      <div class="cat-body ${isCollapsed ? 'collapsed' : ''}" id="catbody-${cat.id}" style="max-height:${isCollapsed ? '0' : '2000px'}">
         ${items.length
-          ? `<div class="links-grid">${items.map(({l,i})=>linkCardHTML(l,i)).join('')}</div>`
-          : `<div class="empty" style="margin-bottom:.5rem">no services in this category</div>`}
+            ? `<div class="links-grid">${items.map(({ l, i }) => linkCardHTML(l, i)).join('')}</div>`
+            : `<div class="empty" style="margin-bottom:.5rem">no services in this category</div>`}
       </div>
     </div>`;
-  });
+      });
 
-  // uncategorised
-  if(uncategorised.length||!cats.length){
-    const label=cats.length?'other':'services';
-    const isCollapsed=collapsedCats['__none']||false;
-    html+=`<div class="cat-section" id="catsec-__none">
+      // uncategorised
+      if (uncategorised.length || !cats.length) {
+        const label = cats.length ? 'other' : 'services';
+        const isCollapsed = collapsedCats['__none'] || false;
+        html += `<div class="cat-section" id="catsec-__none">
       <div class="cat-header" onclick="toggleCat('__none')">
-        <span class="cat-toggle ${isCollapsed?'':'open'}">▶</span>
+        <span class="cat-toggle ${isCollapsed ? '' : 'open'}">▶</span>
         <span class="cat-icon">◈</span>
         <span class="cat-name">${label}</span>
         <span class="cat-count">${uncategorised.length}</span>
         <span class="cat-line"></span>
       </div>
-      <div class="cat-body ${isCollapsed?'collapsed':''}" id="catbody-__none" style="max-height:${isCollapsed?'0':'2000px'}">
+      <div class="cat-body ${isCollapsed ? 'collapsed' : ''}" id="catbody-__none" style="max-height:${isCollapsed ? '0' : '2000px'}">
         ${uncategorised.length
-          ? `<div class="links-grid">${uncategorised.map(({l,i})=>linkCardHTML(l,i)).join('')}</div>`
-          : `<div class="empty" style="margin-bottom:.5rem">no services yet — add some in admin</div>`}
+            ? `<div class="links-grid">${uncategorised.map(({ l, i }) => linkCardHTML(l, i)).join('')}</div>`
+            : `<div class="empty" style="margin-bottom:.5rem">no services yet — add some in admin</div>`}
       </div>
     </div>`;
-  }
+      }
 
-  container.innerHTML=html;
-}
+      container.innerHTML = html;
+    }
 
-function linkCardHTML(l,i){
-  const color=l.color||'var(--accent)';
-  return `<a class="link-card" href="${esc(l.url)}" target="_blank" rel="noopener"
-    data-name="${esc((l.name||'').toLowerCase())}" data-desc="${esc((l.desc||'').toLowerCase())}"
-    data-cat="${esc(l.category||'')}">
+    function linkCardHTML(l, i) {
+      const color = l.color || 'var(--accent)';
+      return `<a class="link-card" href="${esc(l.url)}" target="_blank" rel="noopener"
+    data-name="${esc((l.name || '').toLowerCase())}" data-desc="${esc((l.desc || '').toLowerCase())}"
+    data-cat="${esc(l.category || '')}">
     <div class="cab" style="background:${esc(color)}"></div>
-    <div class="card-top"><div class="card-icon-wrap">${faviconImg(l,20)}</div></div>
+    <div class="card-top"><div class="card-icon-wrap">${faviconImg(l, 20)}</div></div>
     <div class="card-name">${esc(l.name)}</div>
-    ${l.desc?`<div class="card-desc">${esc(l.desc)}</div>`:''}
+    ${l.desc ? `<div class="card-desc">${esc(l.desc)}</div>` : ''}
     <div class="card-url">${esc(l.url)}</div>
   </a>`;
-}
+    }
 
-function toggleCat(id){
-  collapsedCats[id]=!collapsedCats[id];
-  const body=document.getElementById('catbody-'+id);
-  const toggle=document.querySelector(`#catsec-${id} .cat-toggle`);
-  if(!body||!toggle) return;
-  body.classList.toggle('collapsed', collapsedCats[id]);
-  body.style.maxHeight = collapsedCats[id]?'0':'2000px';
-  toggle.classList.toggle('open', !collapsedCats[id]);
-}
+    function toggleCat(id) {
+      collapsedCats[id] = !collapsedCats[id];
+      const body = document.getElementById('catbody-' + id);
+      const toggle = document.querySelector(`#catsec-${id} .cat-toggle`);
+      if (!body || !toggle) return;
+      body.classList.toggle('collapsed', collapsedCats[id]);
+      body.style.maxHeight = collapsedCats[id] ? '0' : '2000px';
+      toggle.classList.toggle('open', !collapsedCats[id]);
+    }
 
-function renderNotes(notes){
-  const list=document.getElementById('notesList');
-  if(!notes.length){list.innerHTML='<div class="empty">no notes yet</div>';return;}
-  list.innerHTML=notes.map(n=>`
+    function renderNotes(notes) {
+      const list = document.getElementById('notesList');
+      if (!notes.length) { list.innerHTML = '<div class="empty">no notes yet</div>'; return; }
+      list.innerHTML = notes.map(n => `
     <div class="note-card">
       <div class="note-meta">${esc(n.date)}</div>
       <div class="note-text">${esc(n.content)}</div>
     </div>`).join('');
-}
+    }
 
-function filterCards(){
-  const q=document.getElementById('searchInput').value.toLowerCase().trim();
-  document.querySelectorAll('.link-card').forEach(card=>{
-    const match=!q||card.dataset.name.includes(q)||card.dataset.desc.includes(q);
-    card.style.display=match?'':'none';
-  });
-  // show/hide empty states per category
-  if(q){
-    document.querySelectorAll('.cat-body').forEach(body=>{
-      body.classList.remove('collapsed');
-      body.style.maxHeight='2000px';
-    });
-  }
-}
+    function filterCards() {
+      const q = document.getElementById('searchInput').value.toLowerCase().trim();
+      document.querySelectorAll('.link-card').forEach(card => {
+        const match = !q || card.dataset.name.includes(q) || card.dataset.desc.includes(q);
+        card.style.display = match ? '' : 'none';
+      });
+      // show/hide empty states per category
+      if (q) {
+        document.querySelectorAll('.cat-body').forEach(body => {
+          body.classList.remove('collapsed');
+          body.style.maxHeight = '2000px';
+        });
+      }
+    }
 
-// ════════════════════════════════════════
-// LOGIN
-// ════════════════════════════════════════
-function openLogin(){
-  document.getElementById('loginBg').classList.add('open');
-  document.getElementById('loginUser').value=''; document.getElementById('loginPass').value='';
-  document.getElementById('loginErr').style.display='none';
-  setTimeout(()=>document.getElementById('loginUser').focus(),80);
-}
-function closeLogin(){ document.getElementById('loginBg').classList.remove('open'); }
-async function tryLogin(){
-  try{
-    await api('POST','/api/login',{username:document.getElementById('loginUser').value,password:document.getElementById('loginPass').value});
-    closeLogin(); openAdmin();
-  }catch{
-    document.getElementById('loginErr').style.display='block';
-    document.getElementById('loginPass').value=''; document.getElementById('loginPass').focus();
-  }
-}
-document.getElementById('loginBg').addEventListener('click',e=>{if(e.target===e.currentTarget)closeLogin();});
+    // ════════════════════════════════════════
+    // LOGIN
+    // ════════════════════════════════════════
+    function openLogin() {
+      document.getElementById('loginBg').classList.add('open');
+      document.getElementById('loginUser').value = ''; document.getElementById('loginPass').value = '';
+      document.getElementById('loginErr').style.display = 'none';
+      setTimeout(() => document.getElementById('loginUser').focus(), 80);
+    }
+    function closeLogin() { document.getElementById('loginBg').classList.remove('open'); }
+    async function tryLogin() {
+      try {
+        await api('POST', '/api/login', { username: document.getElementById('loginUser').value, password: document.getElementById('loginPass').value });
+        closeLogin(); openAdmin();
+      } catch {
+        document.getElementById('loginErr').style.display = 'block';
+        document.getElementById('loginPass').value = ''; document.getElementById('loginPass').focus();
+      }
+    }
+    document.getElementById('loginBg').addEventListener('click', e => { if (e.target === e.currentTarget) closeLogin(); });
 
-// ════════════════════════════════════════
-// ADMIN
-// ════════════════════════════════════════
-function openAdmin(){
-  document.getElementById('adminOverlay').classList.add('open');
-  populateCategoryDropdown('addCategory');
-  refreshAdminServices();
-  refreshAdminCategories();
-  refreshAdminNotes();
-}
-function closeAdmin(){ document.getElementById('adminOverlay').classList.remove('open'); loadData(); }
-function switchTab(name){
-  document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('active');
-  document.getElementById('nav-'+name).classList.add('active');
-}
+    // ════════════════════════════════════════
+    // ADMIN
+    // ════════════════════════════════════════
+    function openAdmin() {
+      document.getElementById('adminOverlay').classList.add('open');
+      populateCategoryDropdown('addCategory');
+      refreshAdminServices();
+      refreshAdminCategories();
+      refreshAdminNotes();
+    }
+    function closeAdmin() { document.getElementById('adminOverlay').classList.remove('open'); loadData(); }
+    function switchTab(name) {
+      document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById('tab-' + name).classList.add('active');
+      document.getElementById('nav-' + name).classList.add('active');
+    }
 
-function populateCategoryDropdown(elId, selectedVal=''){
-  const sel=document.getElementById(elId); if(!sel) return;
-  sel.innerHTML='<option value="">— none —</option>';
-  (state.categories||[]).forEach(c=>{
-    const opt=document.createElement('option');
-    opt.value=c.id; opt.textContent=`${c.icon||'📁'} ${c.name}`;
-    if(c.id===selectedVal) opt.selected=true;
-    sel.appendChild(opt);
-  });
-}
+    function populateCategoryDropdown(elId, selectedVal = '') {
+      const sel = document.getElementById(elId); if (!sel) return;
+      sel.innerHTML = '<option value="">— none —</option>';
+      (state.categories || []).forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id; opt.textContent = `${c.icon || '📁'} ${c.name}`;
+        if (c.id === selectedVal) opt.selected = true;
+        sel.appendChild(opt);
+      });
+    }
 
-// ── SERVICES ──
-function refreshAdminServices(){
-  const list=document.getElementById('adminLinkList');
-  if(!state.links.length){list.innerHTML='<div class="empty">no services yet</div>';return;}
-  list.innerHTML=state.links.map((l,i)=>{
-    const catName=l.category?getCategoryName(l.category):'';
-    return `<div class="item-row" draggable="true" data-idx="${i}"
+    // ── SERVICES ──
+    function refreshAdminServices() {
+      const list = document.getElementById('adminLinkList');
+      if (!state.links.length) { list.innerHTML = '<div class="empty">no services yet</div>'; return; }
+      list.innerHTML = state.links.map((l, i) => {
+        const catName = l.category ? getCategoryName(l.category) : '';
+        return `<div class="item-row" draggable="true" data-idx="${i}"
         ondragstart="dstart(event,${i})" ondragover="dover(event,${i})" ondragleave="dleave(event)" ondrop="ddrop(event,${i})" ondragend="dend()">
       <span class="drag-handle">⠿</span>
-      ${l.faviconUrl?`<img class="row-favicon" src="${esc(faviconSrc(l.faviconUrl))}" alt="" onerror="this.style.display='none'">`:`<span class="row-emoji">${esc(l.icon||'🔗')}</span>`}
+      ${l.faviconUrl ? `<img class="row-favicon" src="${esc(faviconSrc(l.faviconUrl))}" alt="" onerror="this.style.display='none'">` : `<span class="row-emoji">${esc(l.icon || '🔗')}</span>`}
       <div class="row-info">
         <div class="row-name">${esc(l.name)}</div>
         <div class="row-sub">${esc(l.url)}</div>
       </div>
-      ${catName?`<span class="row-badge">${esc(catName)}</span>`:''}
-      ${l.color?`<div class="row-dot" style="background:${esc(l.color)}"></div>`:''}
+      ${catName ? `<span class="row-badge">${esc(catName)}</span>` : ''}
+      ${l.color ? `<div class="row-dot" style="background:${esc(l.color)}"></div>` : ''}
       <div class="row-actions">
         <button class="btn btn-ghost btn-sm" onclick="openEditLink(${i})">edit</button>
         <button class="btn btn-red btn-sm" onclick="deleteLink(${i})">✕</button>
       </div>
     </div>`;
-  }).join('');
-}
+      }).join('');
+    }
 
-function openEditLink(i){
-  const l=state.links[i];
-  const colorPickerId='editLinkColor';
-  let chosenColor=l.color;
-  const catOpts=(state.categories||[]).map(c=>`<option value="${esc(c.id)}" ${c.id===l.category?'selected':''}>${esc(c.icon||'📁')} ${esc(c.name)}</option>`).join('');
+    function openEditLink(i) {
+      const l = state.links[i];
+      const colorPickerId = 'editLinkColor';
+      let chosenColor = l.color;
+      const catOpts = (state.categories || []).map(c => `<option value="${esc(c.id)}" ${c.id === l.category ? 'selected' : ''}>${esc(c.icon || '📁')} ${esc(c.name)}</option>`).join('');
 
-  document.getElementById('editModalBody').innerHTML=`
+      document.getElementById('editModalBody').innerHTML = `
     <div class="modal-title">// edit service</div>
     <div class="field"><label class="fl">url</label><input class="fi" id="el-url" value="${esc(l.url)}"></div>
     <div class="g2">
@@ -753,9 +1723,9 @@ function openEditLink(i){
         <select class="fi" id="el-cat"><option value="">— none —</option>${catOpts}</select>
       </div>
     </div>
-    <div class="field"><label class="fl">description</label><input class="fi" id="el-desc" value="${esc(l.desc||'')}"></div>
+    <div class="field"><label class="fl">description</label><input class="fi" id="el-desc" value="${esc(l.desc || '')}"></div>
     <div class="g2">
-      <div class="field"><label class="fl">emoji override</label><input class="fi" id="el-icon" value="${esc(l.icon||'')}" maxlength="4"></div>
+      <div class="field"><label class="fl">emoji override</label><input class="fi" id="el-icon" value="${esc(l.icon || '')}" maxlength="4"></div>
       <div class="field"><label class="fl">accent colour</label><div class="color-row" id="${colorPickerId}"></div></div>
     </div>
     <div class="modal-footer">
@@ -764,180 +1734,180 @@ function openEditLink(i){
       <button class="btn btn-red" style="margin-left:auto" onclick="deleteLink(${i},true)">delete</button>
     </div>`;
 
-  buildColorPicker(colorPickerId, c=>{ chosenColor=c; }, l.color);
-  window._editLinkColor = ()=>chosenColor;
-  // after render, fix color picker ref
-  const colorRow=document.getElementById(colorPickerId);
-  colorRow.querySelectorAll('.chip').forEach(chip=>{
-    chip.onclick=(()=>{
-      const origOnclick=chip.onclick;
-      return ()=>{
-        colorRow.querySelectorAll('.chip').forEach(ch=>ch.classList.remove('sel'));
-        chip.classList.add('sel');
-        const idx=[...colorRow.children].indexOf(chip);
-        chosenColor=COLORS[idx]?.val??null;
-        window._editLinkColor=()=>chosenColor;
-      };
-    })();
-  });
+      buildColorPicker(colorPickerId, c => { chosenColor = c; }, l.color);
+      window._editLinkColor = () => chosenColor;
+      // after render, fix color picker ref
+      const colorRow = document.getElementById(colorPickerId);
+      colorRow.querySelectorAll('.chip').forEach(chip => {
+        chip.onclick = (() => {
+          const origOnclick = chip.onclick;
+          return () => {
+            colorRow.querySelectorAll('.chip').forEach(ch => ch.classList.remove('sel'));
+            chip.classList.add('sel');
+            const idx = [...colorRow.children].indexOf(chip);
+            chosenColor = COLORS[idx]?.val ?? null;
+            window._editLinkColor = () => chosenColor;
+          };
+        })();
+      });
 
-  openModal();
-}
-
-async function saveEditLink(i){
-  const name=document.getElementById('el-name').value.trim();
-  const url=document.getElementById('el-url').value.trim();
-  const desc=document.getElementById('el-desc').value.trim();
-  const icon=document.getElementById('el-icon').value.trim();
-  const category=document.getElementById('el-cat').value||null;
-  const color=window._editLinkColor?window._editLinkColor():state.links[i].color;
-  if(!name||!url){toast('name and url required','err');return;}
-  try{
-    const d=await api('PUT',`/api/links/${i}`,{name,url,desc,icon,category,color});
-    state.links=d.links; closeModal(); refreshAdminServices(); toast('saved ✓');
-  }catch(e){toast(e.message,'err');}
-}
-
-async function deleteLink(i, fromModal=false){
-  try{
-    const d=await api('DELETE',`/api/links/${i}`);
-    state.links=d.links;
-    if(fromModal) closeModal();
-    refreshAdminServices(); toast('removed');
-  }catch(e){toast(e.message,'err');}
-}
-
-// drag reorder
-function dstart(e,i){dragSrc=i;e.currentTarget.classList.add('dragging');e.dataTransfer.effectAllowed='move';}
-function dover(e,i){e.preventDefault();document.querySelectorAll('.item-row').forEach(r=>r.classList.remove('drag-over'));e.currentTarget.classList.add('drag-over');}
-function dleave(e){e.currentTarget.classList.remove('drag-over');}
-async function ddrop(e,i){
-  e.preventDefault();
-  if(dragSrc===null||dragSrc===i)return;
-  const order=state.links.map((_,idx)=>idx);
-  order.splice(i,0,order.splice(dragSrc,1)[0]);
-  try{const d=await api('POST','/api/links/reorder',{order});state.links=d.links;refreshAdminServices();toast('reordered ✓');}
-  catch(e){toast(e.message,'err');}
-}
-function dend(){document.querySelectorAll('.item-row').forEach(r=>r.classList.remove('dragging','drag-over'));dragSrc=null;}
-
-// meta fetch
-async function autoFetchMeta(){
-  let url=document.getElementById('addUrl').value.trim();
-  if(!url)return;
-  if(!/^https?:\/\//i.test(url)) url='http://'+url;
-  pendingFavicon=null;
-  document.getElementById('metaPreview').classList.remove('show');
-  document.getElementById('metaSpinner').classList.add('show');
-  try{
-    const meta=await api('GET','/api/fetch-meta?url='+encodeURIComponent(url));
-    document.getElementById('metaSpinner').classList.remove('show');
-    if(meta.title||meta.faviconUrl){
-      if(meta.title&&!document.getElementById('addName').value) document.getElementById('addName').value=meta.title;
-      pendingFavicon=meta.faviconUrl;
-      const img=document.getElementById('metaFavicon');
-      if(meta.faviconUrl){img.src=faviconSrc(meta.faviconUrl);img.style.display='';}else img.style.display='none';
-      document.getElementById('metaTitle').textContent=meta.title||url;
-      document.getElementById('metaPreview').classList.add('show');
+      openModal();
     }
-  }catch{document.getElementById('metaSpinner').classList.remove('show');}
-}
 
-async function addLink(){
-  const name=document.getElementById('addName').value.trim();
-  let url=document.getElementById('addUrl').value.trim();
-  const icon=document.getElementById('addIcon').value.trim();
-  const desc=document.getElementById('addDesc').value.trim();
-  const category=document.getElementById('addCategory').value||null;
-  if(!name||!url){toast('name and url required','err');return;}
-  if(!/^https?:\/\//i.test(url)) url='http://'+url;
-  const btn=document.getElementById('addLinkBtn');btn.disabled=true;
-  try{
-    const d=await api('POST','/api/links',{name,url,icon,desc,faviconUrl:pendingFavicon,color:addColor,category});
-    state.links=d.links;
-    ['addName','addUrl','addIcon','addDesc'].forEach(id=>document.getElementById(id).value='');
-    document.getElementById('addCategory').value='';
-    pendingFavicon=null;addColor=null;
-    document.getElementById('metaPreview').classList.remove('show');
-    buildColorPicker('addColorRow',c=>{addColor=c;});
-    refreshAdminServices();toast('service added ✓');
-  }catch(e){toast(e.message,'err');}
-  btn.disabled=false;
-}
+    async function saveEditLink(i) {
+      const name = document.getElementById('el-name').value.trim();
+      const url = document.getElementById('el-url').value.trim();
+      const desc = document.getElementById('el-desc').value.trim();
+      const icon = document.getElementById('el-icon').value.trim();
+      const category = document.getElementById('el-cat').value || null;
+      const color = window._editLinkColor ? window._editLinkColor() : state.links[i].color;
+      if (!name || !url) { toast('name and url required', 'err'); return; }
+      try {
+        const d = await api('PUT', `/api/links/${i}`, { name, url, desc, icon, category, color });
+        state.links = d.links; closeModal(); refreshAdminServices(); toast('saved ✓');
+      } catch (e) { toast(e.message, 'err'); }
+    }
 
-// ── CATEGORIES ──
-function refreshAdminCategories(){
-  const list=document.getElementById('adminCatList');
-  if(!state.categories.length){list.innerHTML='<div class="empty">no categories yet</div>';return;}
-  list.innerHTML=state.categories.map((c,i)=>`
+    async function deleteLink(i, fromModal = false) {
+      try {
+        const d = await api('DELETE', `/api/links/${i}`);
+        state.links = d.links;
+        if (fromModal) closeModal();
+        refreshAdminServices(); toast('removed');
+      } catch (e) { toast(e.message, 'err'); }
+    }
+
+    // drag reorder
+    function dstart(e, i) { dragSrc = i; e.currentTarget.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; }
+    function dover(e, i) { e.preventDefault(); document.querySelectorAll('.item-row').forEach(r => r.classList.remove('drag-over')); e.currentTarget.classList.add('drag-over'); }
+    function dleave(e) { e.currentTarget.classList.remove('drag-over'); }
+    async function ddrop(e, i) {
+      e.preventDefault();
+      if (dragSrc === null || dragSrc === i) return;
+      const order = state.links.map((_, idx) => idx);
+      order.splice(i, 0, order.splice(dragSrc, 1)[0]);
+      try { const d = await api('POST', '/api/links/reorder', { order }); state.links = d.links; refreshAdminServices(); toast('reordered ✓'); }
+      catch (e) { toast(e.message, 'err'); }
+    }
+    function dend() { document.querySelectorAll('.item-row').forEach(r => r.classList.remove('dragging', 'drag-over')); dragSrc = null; }
+
+    // meta fetch
+    async function autoFetchMeta() {
+      let url = document.getElementById('addUrl').value.trim();
+      if (!url) return;
+      if (!/^https?:\/\//i.test(url)) url = 'http://' + url;
+      pendingFavicon = null;
+      document.getElementById('metaPreview').classList.remove('show');
+      document.getElementById('metaSpinner').classList.add('show');
+      try {
+        const meta = await api('GET', '/api/fetch-meta?url=' + encodeURIComponent(url));
+        document.getElementById('metaSpinner').classList.remove('show');
+        if (meta.title || meta.faviconUrl) {
+          if (meta.title && !document.getElementById('addName').value) document.getElementById('addName').value = meta.title;
+          pendingFavicon = meta.faviconUrl;
+          const img = document.getElementById('metaFavicon');
+          if (meta.faviconUrl) { img.src = faviconSrc(meta.faviconUrl); img.style.display = ''; } else img.style.display = 'none';
+          document.getElementById('metaTitle').textContent = meta.title || url;
+          document.getElementById('metaPreview').classList.add('show');
+        }
+      } catch { document.getElementById('metaSpinner').classList.remove('show'); }
+    }
+
+    async function addLink() {
+      const name = document.getElementById('addName').value.trim();
+      let url = document.getElementById('addUrl').value.trim();
+      const icon = document.getElementById('addIcon').value.trim();
+      const desc = document.getElementById('addDesc').value.trim();
+      const category = document.getElementById('addCategory').value || null;
+      if (!name || !url) { toast('name and url required', 'err'); return; }
+      if (!/^https?:\/\//i.test(url)) url = 'http://' + url;
+      const btn = document.getElementById('addLinkBtn'); btn.disabled = true;
+      try {
+        const d = await api('POST', '/api/links', { name, url, icon, desc, faviconUrl: pendingFavicon, color: addColor, category });
+        state.links = d.links;
+        ['addName', 'addUrl', 'addIcon', 'addDesc'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('addCategory').value = '';
+        pendingFavicon = null; addColor = null;
+        document.getElementById('metaPreview').classList.remove('show');
+        buildColorPicker('addColorRow', c => { addColor = c; });
+        refreshAdminServices(); toast('service added ✓');
+      } catch (e) { toast(e.message, 'err'); }
+      btn.disabled = false;
+    }
+
+    // ── CATEGORIES ──
+    function refreshAdminCategories() {
+      const list = document.getElementById('adminCatList');
+      if (!state.categories.length) { list.innerHTML = '<div class="empty">no categories yet</div>'; return; }
+      list.innerHTML = state.categories.map((c, i) => `
     <div class="item-row">
-      <span class="row-emoji">${esc(c.icon||'📁')}</span>
+      <span class="row-emoji">${esc(c.icon || '📁')}</span>
       <div class="row-info"><div class="row-name">${esc(c.name)}</div></div>
-      <span class="row-badge">${state.links.filter(l=>l.category===c.id).length} links</span>
+      <span class="row-badge">${state.links.filter(l => l.category === c.id).length} links</span>
       <div class="row-actions">
         <button class="btn btn-ghost btn-sm" onclick="openEditCategory('${esc(c.id)}')">edit</button>
         <button class="btn btn-red btn-sm" onclick="deleteCategory('${esc(c.id)}')">✕</button>
       </div>
     </div>`).join('');
-}
+    }
 
-function openEditCategory(id){
-  const c=state.categories.find(cat=>cat.id===id);
-  if(!c) return;
-  document.getElementById('editModalBody').innerHTML=`
+    function openEditCategory(id) {
+      const c = state.categories.find(cat => cat.id === id);
+      if (!c) return;
+      document.getElementById('editModalBody').innerHTML = `
     <div class="modal-title">// edit category</div>
     <div class="g2">
       <div class="field"><label class="fl">name</label><input class="fi" id="ec-name" value="${esc(c.name)}"></div>
-      <div class="field"><label class="fl">icon (emoji)</label><input class="fi" id="ec-icon" value="${esc(c.icon||'')}" maxlength="4"></div>
+      <div class="field"><label class="fl">icon (emoji)</label><input class="fi" id="ec-icon" value="${esc(c.icon || '')}" maxlength="4"></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-green" onclick="saveEditCategory('${esc(id)}')">save</button>
       <button class="btn btn-ghost" onclick="closeModal()">cancel</button>
       <button class="btn btn-red" style="margin-left:auto" onclick="deleteCategory('${esc(id)}',true)">delete</button>
     </div>`;
-  openModal();
-}
+      openModal();
+    }
 
-async function saveEditCategory(id){
-  const name=document.getElementById('ec-name').value.trim();
-  const icon=document.getElementById('ec-icon').value.trim();
-  if(!name){toast('name required','err');return;}
-  try{
-    const d=await api('PUT',`/api/categories/${id}`,{name,icon:icon||'📁'});
-    state.categories=d.categories; closeModal(); refreshAdminCategories();
-    populateCategoryDropdown('addCategory'); toast('category saved ✓');
-  }catch(e){toast(e.message,'err');}
-}
+    async function saveEditCategory(id) {
+      const name = document.getElementById('ec-name').value.trim();
+      const icon = document.getElementById('ec-icon').value.trim();
+      if (!name) { toast('name required', 'err'); return; }
+      try {
+        const d = await api('PUT', `/api/categories/${id}`, { name, icon: icon || '📁' });
+        state.categories = d.categories; closeModal(); refreshAdminCategories();
+        populateCategoryDropdown('addCategory'); toast('category saved ✓');
+      } catch (e) { toast(e.message, 'err'); }
+    }
 
-async function addCategory(){
-  const name=document.getElementById('catName').value.trim();
-  const icon=document.getElementById('catIcon').value.trim()||'📁';
-  if(!name){toast('name required','err');return;}
-  try{
-    const d=await api('POST','/api/categories',{name,icon});
-    state.categories=d.categories;
-    document.getElementById('catName').value=''; document.getElementById('catIcon').value='';
-    refreshAdminCategories(); populateCategoryDropdown('addCategory'); toast('category added ✓');
-  }catch(e){toast(e.message,'err');}
-}
+    async function addCategory() {
+      const name = document.getElementById('catName').value.trim();
+      const icon = document.getElementById('catIcon').value.trim() || '📁';
+      if (!name) { toast('name required', 'err'); return; }
+      try {
+        const d = await api('POST', '/api/categories', { name, icon });
+        state.categories = d.categories;
+        document.getElementById('catName').value = ''; document.getElementById('catIcon').value = '';
+        refreshAdminCategories(); populateCategoryDropdown('addCategory'); toast('category added ✓');
+      } catch (e) { toast(e.message, 'err'); }
+    }
 
-async function deleteCategory(id, fromModal=false){
-  try{
-    const d=await api('DELETE',`/api/categories/${id}`);
-    state.categories=d.categories; state.links=d.links;
-    if(fromModal) closeModal();
-    refreshAdminCategories(); refreshAdminServices(); populateCategoryDropdown('addCategory'); toast('category removed');
-  }catch(e){toast(e.message,'err');}
-}
+    async function deleteCategory(id, fromModal = false) {
+      try {
+        const d = await api('DELETE', `/api/categories/${id}`);
+        state.categories = d.categories; state.links = d.links;
+        if (fromModal) closeModal();
+        refreshAdminCategories(); refreshAdminServices(); populateCategoryDropdown('addCategory'); toast('category removed');
+      } catch (e) { toast(e.message, 'err'); }
+    }
 
-// ── NOTES ──
-function refreshAdminNotes(){
-  const el=document.getElementById('adminNoteList');
-  if(!state.notes.length){el.innerHTML='<div class="empty">no notes yet</div>';return;}
-  el.innerHTML=state.notes.map((n,i)=>`
+    // ── NOTES ──
+    function refreshAdminNotes() {
+      const el = document.getElementById('adminNoteList');
+      if (!state.notes.length) { el.innerHTML = '<div class="empty">no notes yet</div>'; return; }
+      el.innerHTML = state.notes.map((n, i) => `
     <div class="item-row" style="cursor:default">
       <div class="row-info">
-        <div class="row-name">${esc(n.content.slice(0,70))}${n.content.length>70?'…':''}</div>
+        <div class="row-name">${esc(n.content.slice(0, 70))}${n.content.length > 70 ? '…' : ''}</div>
         <div class="row-sub">${esc(n.date)}</div>
       </div>
       <div class="row-actions">
@@ -945,11 +1915,11 @@ function refreshAdminNotes(){
         <button class="btn btn-red btn-sm" onclick="deleteNote(${i})">✕</button>
       </div>
     </div>`).join('');
-}
+    }
 
-function openEditNote(i){
-  const n=state.notes[i];
-  document.getElementById('editModalBody').innerHTML=`
+    function openEditNote(i) {
+      const n = state.notes[i];
+      document.getElementById('editModalBody').innerHTML = `
     <div class="modal-title">// edit note</div>
     <div class="field"><label class="fl">content</label>
       <textarea class="fi" id="en-content" style="min-height:120px">${esc(n.content)}</textarea>
@@ -959,115 +1929,118 @@ function openEditNote(i){
       <button class="btn btn-ghost" onclick="closeModal()">cancel</button>
       <button class="btn btn-red" style="margin-left:auto" onclick="deleteNote(${i},true)">delete</button>
     </div>`;
-  openModal();
-}
-
-async function saveEditNote(i){
-  const content=document.getElementById('en-content').value.trim();
-  if(!content){toast('note cannot be empty','err');return;}
-  try{
-    const d=await api('PUT',`/api/notes/${i}`,{content});
-    state.notes=d.notes; closeModal(); refreshAdminNotes(); toast('note saved ✓');
-  }catch(e){toast(e.message,'err');}
-}
-
-async function addNote(){
-  const content=document.getElementById('addNoteContent').value.trim();
-  if(!content){toast('write something first','err');return;}
-  const btn=document.getElementById('addNoteBtn');btn.disabled=true;
-  try{
-    const d=await api('POST','/api/notes',{content});
-    state.notes=d.notes; document.getElementById('addNoteContent').value='';
-    refreshAdminNotes(); toast('note added ✓');
-  }catch(e){toast(e.message,'err');}
-  btn.disabled=false;
-}
-
-async function deleteNote(i, fromModal=false){
-  try{
-    const d=await api('DELETE',`/api/notes/${i}`);
-    state.notes=d.notes;
-    if(fromModal) closeModal();
-    refreshAdminNotes(); toast('note removed');
-  }catch(e){toast(e.message,'err');}
-}
-
-// ── MODAL ──
-function openModal(){ document.getElementById('editModal').classList.add('open'); }
-function closeModal(){ document.getElementById('editModal').classList.remove('open'); }
-document.getElementById('editModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
-
-// ── LAYOUT ──
-function applySettings(s){
-  const cols=s.columns||4;
-  document.documentElement.style.setProperty('--cols',cols);
-  document.getElementById('colsRange').value=cols;
-  document.getElementById('colsVal').textContent=cols;
-  document.body.classList.toggle('compact',!!s.compactMode);
-  document.getElementById('compactToggle').checked=!!s.compactMode;
-}
-function previewCols(v){ document.getElementById('colsVal').textContent=v; document.documentElement.style.setProperty('--cols',v); }
-async function saveCols(v){ try{const d=await api('POST','/api/settings',{columns:parseInt(v)});state.settings=d.settings;toast('saved ✓');}catch(e){toast(e.message,'err');} }
-async function saveCompact(v){ document.body.classList.toggle('compact',v); try{const d=await api('POST','/api/settings',{compactMode:v});state.settings=d.settings;toast('saved ✓');}catch(e){toast(e.message,'err');} }
-
-// ── APPEARANCE ──
-function applyAppearance(ap){
-  const a={...AP_DEF,...ap};
-  document.querySelectorAll('.js-site-name').forEach(el=>el.textContent=a.name);
-  document.title=a.name;
-  const tagEl=document.getElementById('heroTag');
-  if(tagEl) tagEl.innerHTML=a.tag||'good <span id="timeOfDay">morning</span>';
-  const subEl=document.getElementById('heroSubtitle'); if(subEl) subEl.textContent=a.subtitle;
-  window._footerPrefix=a.footer||(a.name+' · running on your lan');
-  let style=document.getElementById('dynamic-appearance');
-  if(!style){style=document.createElement('style');style.id='dynamic-appearance';document.head.appendChild(style);}
-  style.textContent=`:root{--accent:${a.accent};--bg:${a.bg};--surface:${a.surface};--text:${a.text};--mono:${a.monoFont};--sans:${a.sansFont};}`;
-  const set=(id,val)=>{const el=document.getElementById(id);if(el)el.value=val;};
-  set('apName',a.name);set('apTag',a.tag||'');set('apSubtitle',a.subtitle);set('apFooter',a.footer||'');
-  set('apAccent',a.accent);set('apAccentHex',a.accent);
-  set('apBg',a.bg);set('apBgHex',a.bg);
-  set('apSurface',a.surface);set('apSurfaceHex',a.surface);
-  set('apText',a.text);set('apTextHex',a.text);
-  set('apSansFont',a.sansFont);set('apMonoFont',a.monoFont);
-}
-
-function wireColorPickers(){
-  [['apAccent','apAccentHex','--accent'],['apBg','apBgHex','--bg'],['apSurface','apSurfaceHex','--surface'],['apText','apTextHex','--text']].forEach(([pickId,hexId,cssVar])=>{
-    const pick=document.getElementById(pickId);
-    const hex=document.getElementById(hexId);
-    if(pick&&hex){
-      pick.addEventListener('input',()=>{ hex.value=pick.value; document.documentElement.style.setProperty(cssVar,pick.value); });
-      hex.addEventListener('input',()=>{ if(/^#[0-9a-f]{6}$/i.test(hex.value)){pick.value=hex.value;document.documentElement.style.setProperty(cssVar,hex.value);} });
+      openModal();
     }
-  });
-}
 
-async function saveAppearance(){
-  const g=id=>document.getElementById(id)?.value||'';
-  const ap={name:g('apName')||'jarvis',tag:g('apTag'),subtitle:g('apSubtitle'),footer:g('apFooter'),
-    accent:g('apAccent'),bg:g('apBg'),surface:g('apSurface'),text:g('apText'),
-    sansFont:g('apSansFont'),monoFont:g('apMonoFont')};
-  try{const d=await api('POST','/api/appearance',ap);state.appearance=d.appearance;applyAppearance(d.appearance);toast('appearance saved ✓');}
-  catch(e){toast(e.message,'err');}
-}
+    async function saveEditNote(i) {
+      const content = document.getElementById('en-content').value.trim();
+      if (!content) { toast('note cannot be empty', 'err'); return; }
+      try {
+        const d = await api('PUT', `/api/notes/${i}`, { content });
+        state.notes = d.notes; closeModal(); refreshAdminNotes(); toast('note saved ✓');
+      } catch (e) { toast(e.message, 'err'); }
+    }
 
-async function resetAppearance(){
-  try{const d=await api('POST','/api/appearance',AP_DEF);state.appearance=d.appearance;applyAppearance(d.appearance);toast('reset ✓');}
-  catch(e){toast(e.message,'err');}
-}
+    async function addNote() {
+      const content = document.getElementById('addNoteContent').value.trim();
+      if (!content) { toast('write something first', 'err'); return; }
+      const btn = document.getElementById('addNoteBtn'); btn.disabled = true;
+      try {
+        const d = await api('POST', '/api/notes', { content });
+        state.notes = d.notes; document.getElementById('addNoteContent').value = '';
+        refreshAdminNotes(); toast('note added ✓');
+      } catch (e) { toast(e.message, 'err'); }
+      btn.disabled = false;
+    }
 
-// ── SECURITY ──
-async function saveCredentials(){
-  const username=document.getElementById('secUser').value.trim();
-  const newPassword=document.getElementById('secPass').value;
-  const confirmPassword=document.getElementById('secPassConfirm').value;
-  if(!username){toast('username required','err');return;}
-  if(newPassword&&newPassword!==confirmPassword){toast('passwords do not match','err');return;}
-  try{await api('POST','/api/credentials',{username,newPassword,confirmPassword});['secPass','secPassConfirm'].forEach(id=>document.getElementById(id).value='');toast('credentials updated ✓');}
-  catch(e){toast(e.message,'err');}
-}
+    async function deleteNote(i, fromModal = false) {
+      try {
+        const d = await api('DELETE', `/api/notes/${i}`);
+        state.notes = d.notes;
+        if (fromModal) closeModal();
+        refreshAdminNotes(); toast('note removed');
+      } catch (e) { toast(e.message, 'err'); }
+    }
 
-init();
-</script>
+    // ── MODAL ──
+    function openModal() { document.getElementById('editModal').classList.add('open'); }
+    function closeModal() { document.getElementById('editModal').classList.remove('open'); }
+    document.getElementById('editModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+
+    // ── LAYOUT ──
+    function applySettings(s) {
+      const cols = s.columns || 4;
+      document.documentElement.style.setProperty('--cols', cols);
+      document.getElementById('colsRange').value = cols;
+      document.getElementById('colsVal').textContent = cols;
+      document.body.classList.toggle('compact', !!s.compactMode);
+      document.getElementById('compactToggle').checked = !!s.compactMode;
+    }
+    function previewCols(v) { document.getElementById('colsVal').textContent = v; document.documentElement.style.setProperty('--cols', v); }
+    async function saveCols(v) { try { const d = await api('POST', '/api/settings', { columns: parseInt(v) }); state.settings = d.settings; toast('saved ✓'); } catch (e) { toast(e.message, 'err'); } }
+    async function saveCompact(v) { document.body.classList.toggle('compact', v); try { const d = await api('POST', '/api/settings', { compactMode: v }); state.settings = d.settings; toast('saved ✓'); } catch (e) { toast(e.message, 'err'); } }
+
+    // ── APPEARANCE ──
+    function applyAppearance(ap) {
+      const a = { ...AP_DEF, ...ap };
+      document.querySelectorAll('.js-site-name').forEach(el => el.textContent = a.name);
+      document.title = a.name;
+      const tagEl = document.getElementById('heroTag');
+      if (tagEl) tagEl.innerHTML = a.tag || 'good <span id="timeOfDay">morning</span>';
+      const subEl = document.getElementById('heroSubtitle'); if (subEl) subEl.textContent = a.subtitle;
+      window._footerPrefix = a.footer || (a.name + ' · running on your lan');
+      let style = document.getElementById('dynamic-appearance');
+      if (!style) { style = document.createElement('style'); style.id = 'dynamic-appearance'; document.head.appendChild(style); }
+      style.textContent = `:root{--accent:${a.accent};--bg:${a.bg};--surface:${a.surface};--text:${a.text};--mono:${a.monoFont};--sans:${a.sansFont};}`;
+      const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+      set('apName', a.name); set('apTag', a.tag || ''); set('apSubtitle', a.subtitle); set('apFooter', a.footer || '');
+      set('apAccent', a.accent); set('apAccentHex', a.accent);
+      set('apBg', a.bg); set('apBgHex', a.bg);
+      set('apSurface', a.surface); set('apSurfaceHex', a.surface);
+      set('apText', a.text); set('apTextHex', a.text);
+      set('apSansFont', a.sansFont); set('apMonoFont', a.monoFont);
+    }
+
+    function wireColorPickers() {
+      [['apAccent', 'apAccentHex', '--accent'], ['apBg', 'apBgHex', '--bg'], ['apSurface', 'apSurfaceHex', '--surface'], ['apText', 'apTextHex', '--text']].forEach(([pickId, hexId, cssVar]) => {
+        const pick = document.getElementById(pickId);
+        const hex = document.getElementById(hexId);
+        if (pick && hex) {
+          pick.addEventListener('input', () => { hex.value = pick.value; document.documentElement.style.setProperty(cssVar, pick.value); });
+          hex.addEventListener('input', () => { if (/^#[0-9a-f]{6}$/i.test(hex.value)) { pick.value = hex.value; document.documentElement.style.setProperty(cssVar, hex.value); } });
+        }
+      });
+    }
+
+    async function saveAppearance() {
+      const g = id => document.getElementById(id)?.value || '';
+      const ap = {
+        name: g('apName') || 'jarvis', tag: g('apTag'), subtitle: g('apSubtitle'), footer: g('apFooter'),
+        accent: g('apAccent'), bg: g('apBg'), surface: g('apSurface'), text: g('apText'),
+        sansFont: g('apSansFont'), monoFont: g('apMonoFont')
+      };
+      try { const d = await api('POST', '/api/appearance', ap); state.appearance = d.appearance; applyAppearance(d.appearance); toast('appearance saved ✓'); }
+      catch (e) { toast(e.message, 'err'); }
+    }
+
+    async function resetAppearance() {
+      try { const d = await api('POST', '/api/appearance', AP_DEF); state.appearance = d.appearance; applyAppearance(d.appearance); toast('reset ✓'); }
+      catch (e) { toast(e.message, 'err'); }
+    }
+
+    // ── SECURITY ──
+    async function saveCredentials() {
+      const username = document.getElementById('secUser').value.trim();
+      const newPassword = document.getElementById('secPass').value;
+      const confirmPassword = document.getElementById('secPassConfirm').value;
+      if (!username) { toast('username required', 'err'); return; }
+      if (newPassword && newPassword !== confirmPassword) { toast('passwords do not match', 'err'); return; }
+      try { await api('POST', '/api/credentials', { username, newPassword, confirmPassword });['secPass', 'secPassConfirm'].forEach(id => document.getElementById(id).value = ''); toast('credentials updated ✓'); }
+      catch (e) { toast(e.message, 'err'); }
+    }
+
+    init();
+  </script>
 </body>
+
 </html>
