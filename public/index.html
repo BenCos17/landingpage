@@ -1218,12 +1218,12 @@
               <div class="field"><label class="fl">name</label><input class="fi" id="addName" type="text"
                   placeholder="Jellyfin"></div>
               <div class="field"><label class="fl">category</label>
-                <div style="display:flex;gap:.4rem;align-items:flex-end;">
+                <div style="display:flex;gap:.5rem;align-items:center;">
                   <select class="fi" id="addCategory" style="flex:1;">
                     <option value="">— none —</option>
                   </select>
                   <button class="btn btn-ghost btn-sm" onclick="openQuickAddCategory()" title="Create new category"
-                    style="flex-shrink:0;">+ new</button>
+                    style="white-space:nowrap;">+ add</button>
                 </div>
               </div>
             </div>
@@ -1428,7 +1428,7 @@
       { label: 'purple', val: '#a78bfa' }, { label: 'orange', val: '#fb923c' }, { label: 'red', val: '#f87171' },
       { label: 'yellow', val: '#facc15' }, { label: 'pink', val: '#f472b6' },
     ];
-    const VERSION = '1.0.1';
+    const VERSION = '1.0.2';
     const AP_DEF = {
       name: 'jarvis', tag: '', subtitle: 'your local services, in one place.', footer: '',
       accent: '#4ade80', bg: '#0c0e13', surface: '#12151c', text: '#e4e8f0',
