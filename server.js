@@ -13,7 +13,14 @@ function readData() {
   try {
     if (fs.existsSync(DATA_FILE)) return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
   } catch {}
-  return { username: process.env.DEFAULT_USERNAME || 'admin', password: process.env.DEFAULT_PASSWORD || 'admin', links: [], notes: [], settings: { columns: 4, compactMode: false } };
+  return {
+    username: process.env.DEFAULT_USERNAME || 'admin',
+    password: process.env.DEFAULT_PASSWORD || 'admin',
+    links: [], notes: [],
+    categories: [],
+    settings: { columns: 4, compactMode: false },
+    appearance: {}
+  };
 }
 
 function writeData(d) {
@@ -73,6 +80,7 @@ function requireAuth(req, res, next) {
   res.status(401).json({ error: 'unauthorized' });
 }
 
+// ── META ──
 app.get('/api/fetch-meta', async (req, res) => {
   let { url } = req.query;
   if (!url) return res.status(400).json({ error: 'url required' });
@@ -97,6 +105,7 @@ app.get('/api/proxy-favicon', async (req, res) => {
   } catch { res.status(404).end(); }
 });
 
+// ── AUTH ──
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body; const d = readData();
   if (username === d.username && password === d.password) { req.session.authenticated = true; res.json({ ok: true }); }
@@ -105,19 +114,58 @@ app.post('/api/login', (req, res) => {
 app.post('/api/logout', (req, res) => { req.session.destroy(); res.json({ ok: true }); });
 app.get('/api/me', (req, res) => res.json({ authenticated: !!req.session?.authenticated }));
 
-app.get('/api/data', (req, res) => { const d = readData(); res.json({ links: d.links, notes: d.notes, settings: d.settings || {}, appearance: d.appearance || {} }); });
-
-app.post('/api/appearance', requireAuth, (req, res) => {
+// ── DATA ──
+app.get('/api/data', (req, res) => {
   const d = readData();
-  d.appearance = { ...d.appearance, ...req.body };
-  writeData(d); res.json({ ok: true, appearance: d.appearance });
+  res.json({ links: d.links, notes: d.notes, categories: d.categories || [], settings: d.settings || {}, appearance: d.appearance || {} });
 });
 
+// ── CATEGORIES ──
+app.get('/api/categories', (req, res) => res.json(readData().categories || []));
+
+app.post('/api/categories', requireAuth, (req, res) => {
+  const { name, icon, collapsed } = req.body;
+  if (!name) return res.status(400).json({ error: 'name required' });
+  const d = readData();
+  if (!d.categories) d.categories = [];
+  const id = 'cat_' + Date.now();
+  d.categories.push({ id, name, icon: icon || '📁', collapsed: !!collapsed });
+  writeData(d); res.json({ ok: true, categories: d.categories });
+});
+
+app.put('/api/categories/:id', requireAuth, (req, res) => {
+  const d = readData();
+  if (!d.categories) d.categories = [];
+  const idx = d.categories.findIndex(c => c.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: 'not found' });
+  d.categories[idx] = { ...d.categories[idx], ...req.body };
+  writeData(d); res.json({ ok: true, categories: d.categories });
+});
+
+app.delete('/api/categories/:id', requireAuth, (req, res) => {
+  const d = readData();
+  if (!d.categories) d.categories = [];
+  d.categories = d.categories.filter(c => c.id !== req.params.id);
+  // unassign links from deleted category
+  d.links = d.links.map(l => l.category === req.params.id ? { ...l, category: null } : l);
+  writeData(d); res.json({ ok: true, categories: d.categories, links: d.links });
+});
+
+app.post('/api/categories/reorder', requireAuth, (req, res) => {
+  const { order } = req.body;
+  if (!Array.isArray(order)) return res.status(400).json({ error: 'order array required' });
+  const d = readData();
+  if (!d.categories) d.categories = [];
+  d.categories = order.map(id => d.categories.find(c => c.id === id)).filter(Boolean);
+  writeData(d); res.json({ ok: true, categories: d.categories });
+});
+
+// ── LINKS ──
 app.post('/api/links', requireAuth, (req, res) => {
-  const { name, url, icon, desc, faviconUrl, color } = req.body;
+  const { name, url, icon, desc, faviconUrl, color, category } = req.body;
   if (!name || !url) return res.status(400).json({ error: 'name and url required' });
   const d = readData();
-  d.links.push({ name, url: /^https?:\/\//i.test(url) ? url : 'http://'+url, icon: icon||'', desc: desc||'', faviconUrl: faviconUrl||null, color: color||null });
+  d.links.push({ name, url: /^https?:\/\//i.test(url) ? url : 'http://'+url, icon: icon||'', desc: desc||'', faviconUrl: faviconUrl||null, color: color||null, category: category||null });
   writeData(d); res.json({ ok: true, links: d.links });
 });
 
@@ -142,6 +190,7 @@ app.post('/api/links/reorder', requireAuth, (req, res) => {
   writeData(d); res.json({ ok: true, links: d.links });
 });
 
+// ── NOTES ──
 app.post('/api/notes', requireAuth, (req, res) => {
   const { content } = req.body;
   if (!content) return res.status(400).json({ error: 'content required' });
@@ -165,6 +214,7 @@ app.delete('/api/notes/:index', requireAuth, (req, res) => {
   d.notes.splice(i, 1); writeData(d); res.json({ ok: true, notes: d.notes });
 });
 
+// ── CREDENTIALS ──
 app.post('/api/credentials', requireAuth, (req, res) => {
   const { username, newPassword, confirmPassword } = req.body;
   if (!username) return res.status(400).json({ error: 'username required' });
@@ -174,10 +224,18 @@ app.post('/api/credentials', requireAuth, (req, res) => {
   writeData(d); res.json({ ok: true });
 });
 
+// ── SETTINGS ──
 app.post('/api/settings', requireAuth, (req, res) => {
   const d = readData();
   d.settings = { ...d.settings, ...req.body };
   writeData(d); res.json({ ok: true, settings: d.settings });
+});
+
+// ── APPEARANCE ──
+app.post('/api/appearance', requireAuth, (req, res) => {
+  const d = readData();
+  d.appearance = { ...d.appearance, ...req.body };
+  writeData(d); res.json({ ok: true, appearance: d.appearance });
 });
 
 app.listen(PORT, () => console.log(`jarvis running on port ${PORT}`));
