@@ -11,7 +11,7 @@ Jarvis is a personal LAN dashboard for links, categories, and notes. It has a lo
 - Add notes and announcements.
 - Export and import full dashboard backups from the admin panel.
 - Change branding, fonts, colours, layout columns, and compact mode.
-
+(I did use ai to make 90% of this so it probably won't be perfect but it works for me )
 ## Quick Start
 
 ```bash
